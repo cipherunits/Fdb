@@ -1,4 +1,9 @@
+using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -35,6 +40,13 @@ public partial class QueryResultTableViewModel : ViewModelBase
     [ObservableProperty]
     private QueryResultRow? _selectedRow;
 
+    [ObservableProperty]
+    private string _selectionStatus = "Click a cell to select it · drag or Shift-click for a range";
+
+    public Func<string?>? CopySelection { get; set; }
+
+    public Func<string?>? CopyFocusedRow { get; set; }
+
     public ObservableCollection<QueryResultRow> Rows { get; } = new()
     {
         new QueryResultRow { RowIndex = 1, Id = 101, Name = "Alice Johnson", Email = "alice@example.com", Role = "DBA", Status = "Active", CreatedAt = "2026-01-15 08:30:00" },
@@ -51,12 +63,20 @@ public partial class QueryResultTableViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void CopyCell()
-    {
-    }
+    private Task CopyCell() => WriteClipboardAsync(CopySelection?.Invoke());
 
     [RelayCommand]
-    private void CopyRow()
+    private Task CopyRow() => WriteClipboardAsync(CopyFocusedRow?.Invoke());
+
+    private static async Task WriteClipboardAsync(string? text)
     {
+        if (string.IsNullOrEmpty(text))
+            return;
+
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
+            && desktop.MainWindow?.Clipboard is { } clipboard)
+        {
+            await clipboard.SetTextAsync(text);
+        }
     }
 }
