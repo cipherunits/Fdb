@@ -49,18 +49,73 @@
             <Setter Property="Background" Value="#E2E8F0"/>
         </Style>
 
-        <!-- Selected Row (Soft Blue Highlight) -->
+        <!-- Keep the grid's row selection invisible; cells are highlighted individually. -->
         <Style Selector="DataGridRow:selected DataGridCell.row-header-col">
-            <Setter Property="Background" Value="#DBEAFE"/>
-            <Setter Property="Foreground" Value="#1D4ED8"/>
+            <Setter Property="Background" Value="#F1F5F9"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
         </Style>
         <Style Selector="DataGridRow:selected DataGridCell.white-col">
-            <Setter Property="Background" Value="#EFF6FF"/>
-            <Setter Property="Foreground" Value="#1D4ED8"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
         </Style>
         <Style Selector="DataGridRow:selected DataGridCell.alt-col">
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+        </Style>
+        <Style Selector="DataGridRow:selected:pointerover DataGridCell.row-header-col">
+            <Setter Property="Background" Value="#E2E8F0"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+        </Style>
+        <Style Selector="DataGridRow:selected:pointerover DataGridCell.white-col">
+            <Setter Property="Background" Value="#F1F5F9"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+        </Style>
+        <Style Selector="DataGridRow:selected:pointerover DataGridCell.alt-col">
+            <Setter Property="Background" Value="#E2E8F0"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+        </Style>
+
+        <!-- Excel-style cell selection -->
+        <Style Selector="DataGridCell.excel-selected">
+            <Setter Property="Background" Value="#DBEAFE"/>
+            <Setter Property="Foreground" Value="#1E3A8A"/>
+        </Style>
+        <Style Selector="DataGridRow:pointerover DataGridCell.excel-selected">
+            <Setter Property="Background" Value="#BFDBFE"/>
+            <Setter Property="Foreground" Value="#1E3A8A"/>
+        </Style>
+        <Style Selector="DataGridRow:selected DataGridCell.excel-selected">
+            <Setter Property="Background" Value="#DBEAFE"/>
+            <Setter Property="Foreground" Value="#1E3A8A"/>
+        </Style>
+        <Style Selector="DataGridRow:selected:pointerover DataGridCell.excel-selected">
+            <Setter Property="Background" Value="#BFDBFE"/>
+            <Setter Property="Foreground" Value="#1E3A8A"/>
+        </Style>
+
+        <Style Selector="DataGridCell.excel-active">
             <Setter Property="Background" Value="#EFF6FF"/>
-            <Setter Property="Foreground" Value="#1D4ED8"/>
+            <Setter Property="Foreground" Value="#1E3A8A"/>
+            <Setter Property="BorderBrush" Value="#1D4ED8"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+        <Style Selector="DataGridRow:pointerover DataGridCell.excel-active">
+            <Setter Property="Background" Value="#DBEAFE"/>
+            <Setter Property="Foreground" Value="#1E3A8A"/>
+            <Setter Property="BorderBrush" Value="#1D4ED8"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+        <Style Selector="DataGridRow:selected DataGridCell.excel-active">
+            <Setter Property="Background" Value="#EFF6FF"/>
+            <Setter Property="Foreground" Value="#1E3A8A"/>
+            <Setter Property="BorderBrush" Value="#1D4ED8"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+        <Style Selector="DataGridRow:selected:pointerover DataGridCell.excel-active">
+            <Setter Property="Background" Value="#DBEAFE"/>
+            <Setter Property="Foreground" Value="#1E3A8A"/>
+            <Setter Property="BorderBrush" Value="#1D4ED8"/>
+            <Setter Property="BorderThickness" Value="2"/>
         </Style>
 
         <!-- Modern Column Header Styling with Prominent Titles (Compact Height) -->
@@ -156,7 +211,9 @@
                       ItemsSource="{Binding Rows}" 
                       SelectedItem="{Binding SelectedRow}"
                       AutoGenerateColumns="False" 
-                      IsReadOnly="True" 
+                      IsReadOnly="True"
+                      SelectionMode="Single"
+                      ClipboardCopyMode="None"
                       GridLinesVisibility="All" 
                       HorizontalGridLinesBrush="#CBD5E1"
                       VerticalGridLinesBrush="#E2E8F0"
@@ -166,7 +223,11 @@
                       HorizontalScrollBarVisibility="Auto" 
                       VerticalScrollBarVisibility="Auto"
                       BorderThickness="0"
-                      RowHeight="25">
+                      RowHeight="25"
+                      CellPointerPressed="OnCellPointerPressed"
+                      LoadingRow="OnLoadingRow"
+                      UnloadingRow="OnUnloadingRow"
+                      Sorting="OnSorting">
                 
                 <!-- DataGrid Context Menu -->
                 <DataGrid.ContextMenu>
@@ -262,7 +323,7 @@
                     Padding="8,0">
                 <Grid ColumnDefinitions="Auto, *, Auto">
                     <TextBlock Grid.Column="0" 
-                               Text="Ready • Double-click cell to inspect details" 
+                               Text="{Binding SelectionStatus}" 
                                Foreground="{DynamicResource AppTextMutedBrush}" 
                                FontSize="11" 
                                VerticalAlignment="Center"/>
