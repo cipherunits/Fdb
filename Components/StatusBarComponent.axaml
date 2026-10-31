@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="24"
+             x:Class="Fdb.Components.StatusBarComponent">
+
+    <!-- Reusable Desktop Status Bar Component -->
+    <Border Background="{DynamicResource AppSurfaceBrush}" 
+            BorderBrush="{DynamicResource AppBorderBrush}" 
+            BorderThickness="0,1,0,0" 
+            Height="24" 
+            Padding="10,0">
+        <Grid ColumnDefinitions="Auto, *, Auto">
+            <!-- Left: Engine Status -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <Ellipse Width="7" Height="7" Fill="#10B981" VerticalAlignment="Center"/>
+                <TextBlock Text="Ready" 
+                           Foreground="{DynamicResource AppTextSecondaryBrush}" 
+                           FontSize="11" 
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Right: Document & Server Metadata -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                <TextBlock Text="Ln 1, Col 1" 
+                           Foreground="{DynamicResource AppTextMutedBrush}" 
+                           FontSize="11" 
+                           VerticalAlignment="Center"/>
+                <TextBlock Text="UTF-8" 
+                           Foreground="{DynamicResource AppTextMutedBrush}" 
+                           FontSize="11" 
+                           VerticalAlignment="Center"/>
+                <TextBlock Text="SQL Server 2022" 
+                           Foreground="{DynamicResource AppTextMutedBrush}" 
+                           FontSize="11" 
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

@@ -1,0 +1,74 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Global Modern Typography -->
+    <Style Selector="TextBlock">
+        <Setter Property="FontFamily" Value="Inter, Segoe UI Variable, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="12"/>
+    </Style>
+
+    <!-- Modern Menu & Toolbar Buttons -->
+    <Style Selector="Button.classic-menu-btn">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource AppTextSecondaryBrush}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="MinHeight" Value="24"/>
+    </Style>
+    <Style Selector="Button.classic-menu-btn:pointerover">
+        <Setter Property="Background" Value="{DynamicResource AppToolHoverBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
+    </Style>
+
+    <!-- Modern Toolbar Action Button -->
+    <Style Selector="Button.classic-tool-btn">
+        <Setter Property="Background" Value="{DynamicResource AppControlFaceBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Padding" Value="10,4"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+        <Setter Property="MinHeight" Value="26"/>
+    </Style>
+    <Style Selector="Button.classic-tool-btn:pointerover">
+        <Setter Property="Background" Value="{DynamicResource AppToolHoverBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppToolHoverBorderBrush}"/>
+    </Style>
+
+    <!-- Modern Tab Button -->
+    <Style Selector="Button.classic-tab-btn">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource AppTextSecondaryBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="CornerRadius" Value="4,4,0,0"/>
+        <Setter Property="BorderThickness" Value="0,0,0,2"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Margin" Value="0,0,2,0"/>
+    </Style>
+    <Style Selector="Button.classic-tab-btn:pointerover">
+        <Setter Property="Background" Value="{DynamicResource AppTabHoverBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
+    </Style>
+    <Style Selector="Button.classic-tab-btn.active">
+        <Setter Property="Background" Value="{DynamicResource AppTabActiveBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource AppAccentBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,2"/>
+    </Style>
+
+    <!-- Modern GridSplitter -->
+    <Style Selector="GridSplitter">
+        <Setter Property="Background" Value="{DynamicResource AppSplitterBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="GridSplitter:pointerover">
+        <Setter Property="Background" Value="{DynamicResource AppSplitterHoverBrush}"/>
+    </Style>
+
+</Styles>

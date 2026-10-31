@@ -1,0 +1,113 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Fdb.ViewModels"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+             x:Class="Fdb.Components.ConfirmActionModalComponent"
+             x:DataType="vm:ConfirmActionModalViewModel"
+             IsVisible="{Binding IsOpen}">
+
+    <!-- Reusable Action Confirmation & Destruction Alert Modal -->
+    <Grid>
+        <!-- Backdrop (Click to dismiss) -->
+        <Border Background="#660F172A" PointerPressed="OnBackdropPointerPressed" />
+
+        <!-- Centered Dialog Window Card -->
+        <Border Background="{DynamicResource AppWorkspaceBrush}" 
+                BorderBrush="{DynamicResource AppBorderBrush}" 
+                BorderThickness="1" 
+                CornerRadius="8" 
+                BoxShadow="0 10 25 0 #33000000"
+                Width="420"
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center">
+            
+            <Grid RowDefinitions="Auto, *, Auto">
+                
+                <!-- 1. Header -->
+                <Border Grid.Row="0" 
+                        Background="{DynamicResource AppSurfaceBrush}" 
+                        BorderBrush="{DynamicResource AppBorderBrush}" 
+                        BorderThickness="0,0,0,1" 
+                        CornerRadius="8,8,0,0"
+                        Padding="16,12">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <Border Grid.Column="0" 
+                                Background="#FEE2E2" 
+                                CornerRadius="6" 
+                                Width="28" 
+                                Height="28" 
+                                Margin="0,0,10,0"
+                                VerticalAlignment="Center">
+                            <ui:FASymbolIcon Symbol="Important" FontSize="13" Foreground="#DC2626" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <TextBlock Grid.Column="1" 
+                                   Text="{Binding Title}" 
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}" 
+                                   FontSize="13" 
+                                   FontWeight="Bold" 
+                                   VerticalAlignment="Center"/>
+
+                        <Button Grid.Column="2" 
+                                Classes="classic-menu-btn" 
+                                Command="{Binding CancelCommand}"
+                                Padding="6,2" 
+                                MinHeight="22">
+                            <ui:FASymbolIcon Symbol="Dismiss" FontSize="10"/>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- 2. Message Body -->
+                <StackPanel Grid.Row="1" Margin="20,16" Spacing="10">
+                    <TextBlock Text="{Binding Message}" 
+                               Foreground="{DynamicResource AppTextSecondaryBrush}" 
+                               FontSize="12" 
+                               TextWrapping="Wrap" 
+                               LineHeight="18"/>
+
+                    <!-- Target Name Pill (if provided) -->
+                    <Border Background="{DynamicResource AppSurfaceBrush}" 
+                            BorderBrush="{DynamicResource AppBorderBrush}" 
+                            BorderThickness="1" 
+                            CornerRadius="4" 
+                            Padding="8,4" 
+                            HorizontalAlignment="Left"
+                            IsVisible="{Binding TargetName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock Text="{Binding TargetName}" 
+                                   FontFamily="Cascadia Code, Consolas, monospace" 
+                                   FontSize="11" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="#DC2626"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- 3. Footer -->
+                <Border Grid.Row="2" 
+                        Background="{DynamicResource AppSurfaceBrush}" 
+                        BorderBrush="{DynamicResource AppBorderBrush}" 
+                        BorderThickness="0,1,0,0" 
+                        CornerRadius="0,0,8,8"
+                        Padding="16,10">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                        <Button Classes="classic-tool-btn" 
+                                Content="Cancel" 
+                                Command="{Binding CancelCommand}"/>
+
+                        <Button Background="#DC2626" 
+                                Foreground="White" 
+                                FontWeight="SemiBold" 
+                                FontSize="11" 
+                                CornerRadius="4" 
+                                Padding="16,6"
+                                Content="{Binding ConfirmButtonText}" 
+                                Command="{Binding ConfirmCommand}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

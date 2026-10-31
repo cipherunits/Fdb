@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Fdb.ViewModels"
+             xmlns:components="using:Fdb.Components"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="180"
+             x:Class="Fdb.Components.FooterComponent"
+             x:DataType="vm:FooterViewModel"
+             IsVisible="{Binding IsVisible}">
+
+    <!-- Reusable Output & Results Panel Component with Auto-Expanding Tabs -->
+    <Border Background="{DynamicResource AppSurfaceBrush}" 
+            BorderBrush="{DynamicResource AppBorderBrush}" 
+            BorderThickness="0,1,0,0">
+        <Grid RowDefinitions="Auto, Auto, *">
+            
+            <!-- 1. Header with Close Command -->
+            <components:ToolWindowHeaderComponent Grid.Row="0" 
+                                                  Title="OUTPUT &amp; RESULTS" 
+                                                  CloseCommand="{Binding ClosePanelCommand}" />
+
+            <!-- 2. Auto-Expanding Tabs Bar with Right-Click ContextMenu -->
+            <Border Grid.Row="1" 
+                    Background="{DynamicResource AppSurfaceBrush}" 
+                    BorderBrush="{DynamicResource AppBorderBrush}" 
+                    BorderThickness="0,0,0,1" 
+                    Padding="4,2,4,0">
+                <ItemsControl ItemsSource="{Binding Tabs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="1" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Classes="classic-tab-btn" 
+                                    Content="{Binding}" 
+                                    Command="{Binding $parent[UserControl].((vm:FooterViewModel)DataContext).SelectTabCommand}"
+                                    CommandParameter="{Binding}"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Center">
+                                <!-- Right-Click ContextMenu -->
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Close Tab" 
+                                                  Command="{Binding $parent[UserControl].((vm:FooterViewModel)DataContext).CloseTabCommand}" 
+                                                  CommandParameter="{Binding}" />
+                                        <MenuItem Header="Close Other Tabs" 
+                                                  Command="{Binding $parent[UserControl].((vm:FooterViewModel)DataContext).CloseOtherTabsCommand}" 
+                                                  CommandParameter="{Binding}" />
+                                        <Separator />
+                                        <MenuItem Header="Close Footer Panel" 
+                                                  Command="{Binding $parent[UserControl].((vm:FooterViewModel)DataContext).ClosePanelCommand}" />
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
+            <!-- 3. Inset Content Container (Results Grid / Query Execution Logs) -->
+            <Border Grid.Row="2" 
+                    Background="{DynamicResource AppWorkspaceBrush}" 
+                    BorderBrush="{DynamicResource AppBorderBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="4"
+                    Margin="6"
+                    ClipToBounds="True">
+                <components:QueryResultTableComponent DataContext="{Binding $parent[Window].((vm:MainViewModel)DataContext).SampleQueryResult}" />
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

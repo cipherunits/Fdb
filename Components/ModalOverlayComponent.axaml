@@ -1,0 +1,120 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:components="using:Fdb.Components"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+             x:Class="Fdb.Components.ModalOverlayComponent"
+             IsVisible="{Binding $self.IsOpen}">
+
+    <!-- Modern Reusable Modal Backdrop & Dialog Container -->
+    <Grid>
+        <!-- 1. Semi-Transparent Backdrop (Click to Dismiss) -->
+        <Border Background="#660F172A" 
+                PointerPressed="OnBackdropPointerPressed"/>
+
+        <!-- 2. Centered Modal Dialog Card -->
+        <Border Background="{DynamicResource AppWorkspaceBrush}" 
+                BorderBrush="{DynamicResource AppBorderBrush}" 
+                BorderThickness="1" 
+                CornerRadius="8" 
+                BoxShadow="0 10 25 0 #33000000"
+                Width="{Binding $parent[components:ModalOverlayComponent].DialogWidth}"
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center">
+            
+            <Grid RowDefinitions="Auto, *, Auto">
+                
+                <!-- Modal Header -->
+                <Border Grid.Row="0" 
+                        Background="{DynamicResource AppSurfaceBrush}" 
+                        BorderBrush="{DynamicResource AppBorderBrush}" 
+                        BorderThickness="0,0,0,1" 
+                        CornerRadius="8,8,0,0"
+                        Padding="16,12">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <!-- Icon -->
+                        <Border Grid.Column="0" 
+                                Background="{DynamicResource AppSurfaceBrush}" 
+                                BorderBrush="{DynamicResource AppBorderBrush}" 
+                                BorderThickness="1" 
+                                CornerRadius="6" 
+                                Width="32" 
+                                Height="32" 
+                                Margin="0,0,10,0"
+                                VerticalAlignment="Center">
+                            <ui:FASymbolIcon Symbol="Important" 
+                                             FontSize="14" 
+                                             Foreground="{DynamicResource AppAccentBrush}" 
+                                             HorizontalAlignment="Center" 
+                                             VerticalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Title & Subtitle -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding $parent[components:ModalOverlayComponent].Title}" 
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}" 
+                                       FontSize="14" 
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="{Binding $parent[components:ModalOverlayComponent].Subtitle}" 
+                                       Foreground="{DynamicResource AppTextMutedBrush}" 
+                                       FontSize="11" 
+                                       Margin="0,2,0,0" 
+                                       IsVisible="{Binding $parent[components:ModalOverlayComponent].Subtitle, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                        </StackPanel>
+
+                        <!-- Close Button -->
+                        <Button Grid.Column="2" 
+                                Classes="classic-menu-btn" 
+                                Command="{Binding $parent[components:ModalOverlayComponent].CloseCommand}"
+                                Padding="6,2" 
+                                MinHeight="22" 
+                                ToolTip.Tip="Close">
+                            <ui:FASymbolIcon Symbol="Dismiss" FontSize="10"/>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- Modal Body (Content Slot) -->
+                <ContentPresenter Grid.Row="1" 
+                                  Content="{Binding $parent[components:ModalOverlayComponent].ModalContent}"
+                                  Margin="16" />
+
+                <!-- Modal Footer Actions -->
+                <Border Grid.Row="2" 
+                        Background="{DynamicResource AppSurfaceBrush}" 
+                        BorderBrush="{DynamicResource AppBorderBrush}" 
+                        BorderThickness="0,1,0,0" 
+                        CornerRadius="0,0,8,8"
+                        Padding="16,10">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <!-- Left Action (Optional) -->
+                        <Button Grid.Column="0" 
+                                Classes="classic-tool-btn" 
+                                Content="{Binding $parent[components:ModalOverlayComponent].SecondaryButtonText}" 
+                                Command="{Binding $parent[components:ModalOverlayComponent].SecondaryCommand}"
+                                IsVisible="{Binding $parent[components:ModalOverlayComponent].SecondaryButtonText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                        <!-- Right Actions -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                            <Button Classes="classic-tool-btn" 
+                                    Content="{Binding $parent[components:ModalOverlayComponent].CancelButtonText}" 
+                                    Command="{Binding $parent[components:ModalOverlayComponent].CloseCommand}"/>
+
+                            <Button Background="{DynamicResource AppAccentBrush}" 
+                                    Foreground="White" 
+                                    FontWeight="SemiBold" 
+                                    FontSize="11" 
+                                    CornerRadius="4" 
+                                    Padding="14,6"
+                                    Content="{Binding $parent[components:ModalOverlayComponent].PrimaryButtonText}" 
+                                    Command="{Binding $parent[components:ModalOverlayComponent].PrimaryCommand}"
+                                    IsVisible="{Binding $parent[components:ModalOverlayComponent].PrimaryButtonText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

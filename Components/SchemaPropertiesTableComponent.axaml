@@ -1,0 +1,212 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Fdb.ViewModels"
+             xmlns:models="using:Fdb.Models"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="350"
+             x:Class="Fdb.Components.SchemaPropertiesTableComponent"
+             x:DataType="vm:SchemaPropertiesTableViewModel">
+
+    <UserControl.Styles>
+        <!-- Distinct Row Header / Index Column Cell Style with Prominent Divider Line -->
+        <Style Selector="DataGridCell.row-header-col">
+            <Setter Property="Background" Value="#F1F5F9"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="0,0,2,1"/>
+        </Style>
+
+        <!-- Alternating Column Cell Colors (Compact Height) -->
+        <Style Selector="DataGridCell.white-col">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Padding" Value="8,2"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        </Style>
+        <Style Selector="DataGridCell.alt-col">
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Padding" Value="8,2"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        </Style>
+
+        <!-- Hover State on Rows -->
+        <Style Selector="DataGridRow:pointerover DataGridCell.row-header-col">
+            <Setter Property="Background" Value="#E2E8F0"/>
+        </Style>
+        <Style Selector="DataGridRow:pointerover DataGridCell.white-col">
+            <Setter Property="Background" Value="#F1F5F9"/>
+        </Style>
+        <Style Selector="DataGridRow:pointerover DataGridCell.alt-col">
+            <Setter Property="Background" Value="#E2E8F0"/>
+        </Style>
+
+        <!-- Selected Row Highlight -->
+        <Style Selector="DataGridRow:selected DataGridCell.row-header-col">
+            <Setter Property="Background" Value="#DBEAFE"/>
+            <Setter Property="Foreground" Value="#1D4ED8"/>
+        </Style>
+        <Style Selector="DataGridRow:selected DataGridCell.white-col">
+            <Setter Property="Background" Value="#EFF6FF"/>
+            <Setter Property="Foreground" Value="#1D4ED8"/>
+        </Style>
+        <Style Selector="DataGridRow:selected DataGridCell.alt-col">
+            <Setter Property="Background" Value="#EFF6FF"/>
+            <Setter Property="Foreground" Value="#1D4ED8"/>
+        </Style>
+
+        <!-- Column Header Styling with Prominent Titles (Compact Height) -->
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="#F1F5F9"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Padding" Value="8,2"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        </Style>
+    </UserControl.Styles>
+
+    <!-- Reusable Table Schema & Column Properties Component with Alternating Columns -->
+    <Border Background="{DynamicResource AppWorkspaceBrush}">
+        <Grid RowDefinitions="Auto, *">
+            
+            <!-- 1. Header Toolbar -->
+            <Border Grid.Row="0" 
+                    Background="{DynamicResource AppSurfaceBrush}" 
+                    BorderBrush="{DynamicResource AppBorderBrush}" 
+                    BorderThickness="0,0,0,1" 
+                    Padding="6,4">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <TextBox Width="180" 
+                                 Height="26" 
+                                 FontSize="11" 
+                                 Padding="6,3" 
+                                 CornerRadius="4" 
+                                 PlaceholderText="Filter columns..." 
+                                 Text="{Binding FilterText}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <Button Classes="classic-tool-btn">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <ui:FASymbolIcon Symbol="Copy" FontSize="11" VerticalAlignment="Center"/>
+                                <TextBlock Text="Copy Column Names" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="classic-tool-btn">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <ui:FASymbolIcon Symbol="Code" FontSize="11" VerticalAlignment="Center"/>
+                                <TextBlock Text="Generate DDL" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- 2. Schema Columns DataGrid with Alternating Columns (RowHeight=25) -->
+            <DataGrid Grid.Row="1" 
+                      ItemsSource="{Binding Columns}" 
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True" 
+                      GridLinesVisibility="All" 
+                      HorizontalGridLinesBrush="#CBD5E1" 
+                      VerticalGridLinesBrush="#E2E8F0"
+                      CanUserResizeColumns="True" 
+                      CanUserSortColumns="True"
+                      HeadersVisibility="Column"
+                      BorderThickness="0"
+                      RowHeight="25">
+                <DataGrid.Columns>
+                    <!-- Col 0: Ordinal / Row # (Gutter style with prominent vertical line divider in front of number) -->
+                    <DataGridTemplateColumn Header="ROW #" 
+                                            CellStyleClasses="row-header-col"
+                                            Width="56" 
+                                            CanUserResize="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:TableColumnItem">
+                                <Grid ColumnDefinitions="*, Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                    <TextBlock Grid.Column="0" 
+                                               Text="{Binding Ordinal}" 
+                                               Foreground="#0F172A" 
+                                               FontSize="11" 
+                                               FontWeight="Bold" 
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"/>
+                                    <!-- Clear vertical divider line right in front of the row number -->
+                                    <Border Grid.Column="1" 
+                                            Width="2" 
+                                            Background="#94A3B8" 
+                                            HorizontalAlignment="Right" 
+                                            VerticalAlignment="Stretch"/>
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Key Indicator (Pure White) -->
+                    <DataGridTemplateColumn Header="KEY" 
+                                            CellStyleClasses="white-col"
+                                            Width="55">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="4">
+                                    <ui:FASymbolIcon Symbol="Checkmark" FontSize="10" Foreground="#2563EB" ToolTip.Tip="Primary Key" IsVisible="{Binding IsPrimaryKey}"/>
+                                    <ui:FASymbolIcon Symbol="Link" FontSize="10" Foreground="#64748B" ToolTip.Tip="Foreign Key" IsVisible="{Binding IsForeignKey}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Column Name (Dimmer Off-White) -->
+                    <DataGridTextColumn Header="COLUMN NAME" 
+                                        CellStyleClasses="alt-col"
+                                        Binding="{Binding Name}" 
+                                        FontWeight="SemiBold"
+                                        Width="160" />
+
+                    <!-- Data Type (Pure White) -->
+                    <DataGridTextColumn Header="DATA TYPE" 
+                                        CellStyleClasses="white-col"
+                                        Binding="{Binding DataType}" 
+                                        Width="120" />
+
+                    <!-- Max Length (Dimmer Off-White) -->
+                    <DataGridTextColumn Header="LENGTH" 
+                                        CellStyleClasses="alt-col"
+                                        Binding="{Binding MaxLength}" 
+                                        Width="80" />
+
+                    <!-- Nullable (Pure White) -->
+                    <DataGridCheckBoxColumn Header="NULLABLE" 
+                                            CellStyleClasses="white-col"
+                                            Binding="{Binding IsNullable}" 
+                                            Width="90" />
+
+                    <!-- Default Value (Dimmer Off-White) -->
+                    <DataGridTextColumn Header="DEFAULT" 
+                                        CellStyleClasses="alt-col"
+                                        Binding="{Binding DefaultValue}" 
+                                        Width="140" />
+
+                    <!-- Description (Pure White) -->
+                    <DataGridTextColumn Header="DESCRIPTION" 
+                                        CellStyleClasses="white-col"
+                                        Binding="{Binding Description}" 
+                                        Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Border>
+</UserControl>

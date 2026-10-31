@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Fdb.ViewModels"
+             xmlns:components="using:Fdb.Components"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="600"
+             x:Class="Fdb.Components.SidebarComponent"
+             x:DataType="vm:SidebarViewModel"
+             IsVisible="{Binding IsVisible}">
+
+    <!-- Reusable Sidebar Panel Component with Auto-Expanding Tabs -->
+    <Border Background="{DynamicResource AppSurfaceBrush}" 
+            BorderBrush="{DynamicResource AppBorderBrush}" 
+            BorderThickness="0,0,1,0">
+        <Grid RowDefinitions="Auto, Auto, *">
+            
+            <!-- 1. Tool Window Header -->
+            <components:ToolWindowHeaderComponent Grid.Row="0" 
+                                                  Title="OBJECT EXPLORER" 
+                                                  CloseCommand="{Binding ClosePanelCommand}" />
+
+            <!-- 2. Auto-Expanding Tab Strip with Right-Click ContextMenu -->
+            <Border Grid.Row="1" 
+                    Background="{DynamicResource AppSurfaceBrush}" 
+                    BorderBrush="{DynamicResource AppBorderBrush}" 
+                    BorderThickness="0,0,0,1" 
+                    Padding="4,2,4,0">
+                <ItemsControl ItemsSource="{Binding Tabs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="1" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Classes="classic-tab-btn" 
+                                    Content="{Binding}" 
+                                    Command="{Binding $parent[UserControl].((vm:SidebarViewModel)DataContext).SelectTabCommand}"
+                                    CommandParameter="{Binding}"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Center">
+                                <!-- Right-Click ContextMenu -->
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Close Tab" 
+                                                  Command="{Binding $parent[UserControl].((vm:SidebarViewModel)DataContext).CloseTabCommand}" 
+                                                  CommandParameter="{Binding}" />
+                                        <Separator />
+                                        <MenuItem Header="Close Sidebar Panel" 
+                                                  Command="{Binding $parent[UserControl].((vm:SidebarViewModel)DataContext).ClosePanelCommand}" />
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
+            <!-- 3. Inset Canvas (Object Explorer Tree View / Empty State) -->
+            <Border Grid.Row="2" 
+                    Background="{DynamicResource AppWorkspaceBrush}" 
+                    BorderBrush="{DynamicResource AppBorderBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="4"
+                    Margin="6">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" Margin="16">
+                    <ui:FASymbolIcon Symbol="Folder" FontSize="32" Foreground="{DynamicResource AppTextMutedBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="No Active Connection" 
+                               Foreground="{DynamicResource AppTextSecondaryBrush}" 
+                               FontSize="11" 
+                               FontWeight="SemiBold" 
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"/>
+                    <Button Classes="classic-tool-btn" 
+                            Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).ConnectModal.OpenCommand}"
+                            HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <ui:FASymbolIcon Symbol="Link" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center"/>
+                            <TextBlock Text="Connect..." VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>
