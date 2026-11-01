@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Fdb.ViewModels"
+             xmlns:components="using:Fdb.Components"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="400"
              x:Class="Fdb.Components.QueryResultTableComponent"
@@ -135,76 +136,8 @@
     <Border Background="{DynamicResource AppWorkspaceBrush}">
         <Grid RowDefinitions="Auto, *, Auto">
             
-            <!-- 1. Table Toolbar (Compact Height) -->
-            <Border Grid.Row="0" 
-                    Background="{DynamicResource AppSurfaceBrush}" 
-                    BorderBrush="{DynamicResource AppBorderBrush}" 
-                    BorderThickness="0,0,0,1" 
-                    Padding="6,2">
-                <Grid ColumnDefinitions="Auto, *, Auto">
-                    <!-- Left: Search Filter -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                        <TextBox Width="180" 
-                                 Height="23" 
-                                 FontSize="11" 
-                                 Padding="6,2" 
-                                 CornerRadius="4" 
-                                 PlaceholderText="Filter table rows..." 
-                                 Text="{Binding SearchFilter}"/>
-                        <Button Classes="classic-tool-btn" Command="{Binding RefreshCommand}" Height="23" Padding="6,2">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <ui:FASymbolIcon Symbol="Refresh" FontSize="11" VerticalAlignment="Center"/>
-                                <TextBlock Text="Refresh" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-
-                    <!-- Right: Execution Stats & Export -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <!-- Execution Time Badge -->
-                        <Border Background="{DynamicResource AppWorkspaceBrush}" 
-                                BorderBrush="{DynamicResource AppBorderBrush}" 
-                                BorderThickness="1" 
-                                CornerRadius="4" 
-                                Height="23"
-                                Padding="8,1">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <ui:FASymbolIcon Symbol="Clock" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding ExecutionTime}" 
-                                           Foreground="{DynamicResource AppTextSecondaryBrush}" 
-                                           FontSize="11" 
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Row Count Badge -->
-                        <Border Background="{DynamicResource AppWorkspaceBrush}" 
-                                BorderBrush="{DynamicResource AppBorderBrush}" 
-                                BorderThickness="1" 
-                                CornerRadius="4" 
-                                Height="23"
-                                Padding="8,1">
-                            <TextBlock Text="{Binding TotalRows, StringFormat='{}{0} rows'}" 
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}" 
-                                       FontSize="11" 
-                                       FontWeight="Medium"
-                                       VerticalAlignment="Center"/>
-                        </Border>
-
-                        <Button Classes="classic-tool-btn" 
-                                Height="23" 
-                                Padding="6,2"
-                                Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).ExportModal.OpenCommand}"
-                                ToolTip.Tip="Export table rows (CSV, JSON, SQL, TSV)">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <ui:FASymbolIcon Symbol="Download" FontSize="11" VerticalAlignment="Center"/>
-                                <TextBlock Text="Export..." VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
+            <!-- 1. Table Toolbar Component -->
+            <components:TableToolbarComponent Grid.Row="0" DataContext="{Binding}" />
             <!-- 2. Interactive DataGrid with Alternating Columns & Prominent Titles (RowHeight=25) -->
             <DataGrid x:Name="ResultsDataGrid"
                       Grid.Row="1" 
@@ -314,30 +247,8 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <!-- 3. Table Pagination / Status Bar (Compact Height) -->
-            <Border Grid.Row="2" 
-                    Background="{DynamicResource AppSurfaceBrush}" 
-                    BorderBrush="{DynamicResource AppBorderBrush}" 
-                    BorderThickness="0,1,0,0" 
-                    Height="22" 
-                    Padding="8,0">
-                <Grid ColumnDefinitions="Auto, *, Auto">
-                    <TextBlock Grid.Column="0" 
-                               Text="{Binding SelectionStatus}" 
-                               Foreground="{DynamicResource AppTextMutedBrush}" 
-                               FontSize="11" 
-                               VerticalAlignment="Center"/>
-
-                    <!-- Pagination Navigation -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                        <Button Classes="classic-menu-btn" Content="«" Padding="6,1" FontSize="11" MinHeight="18" />
-                        <Button Classes="classic-menu-btn" Content="‹" Padding="6,1" FontSize="11" MinHeight="18" />
-                        <TextBlock Text="Page 1 of 1" Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" Margin="4,0"/>
-                        <Button Classes="classic-menu-btn" Content="›" Padding="6,1" FontSize="11" MinHeight="18" />
-                        <Button Classes="classic-menu-btn" Content="»" Padding="6,1" FontSize="11" MinHeight="18" />
-                    </StackPanel>
-                </Grid>
-            </Border>
+            <!-- 3. Table Pagination Component -->
+            <components:TablePaginationComponent Grid.Row="2" DataContext="{Binding}" />
         </Grid>
     </Border>
 </UserControl>

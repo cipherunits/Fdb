@@ -71,6 +71,11 @@ public partial class EditorComponent : UserControl
         }
     }
 
+    private void OnTabStripTabSelected(object? sender, EditorTabItem tab)
+    {
+        HideCompletion();
+    }
+
     public void OnTabPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         HideCompletion();

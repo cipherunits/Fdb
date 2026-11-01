@@ -20,11 +20,14 @@ The application is structured around a **strictly modular, reusable component ar
 ```
 Components/
 ├── Editor & IntelliSense:
-│   ├── EditorComponent.axaml                   # Multi-tab SQL query editor workspace
+│   ├── EditorComponent.axaml                   # Composed multi-tab SQL query editor workspace
+│   ├── EditorTabStripComponent.axaml           # Reusable auto-expanding uniform tab strip with close & add actions
 │   └── SqlIntelliSenseOverlayComponent.axaml   # Reusable floating SQL autocomplete & snippet card
 │
 ├── Data Tables & Grids:
-│   ├── QueryResultTableComponent.axaml         # Excel-grade query results grid with alternating columns
+│   ├── QueryResultTableComponent.axaml         # Composed Excel-grade query results grid with alternating columns
+│   ├── TableToolbarComponent.axaml             # Reusable table search filter, refresh, stats badge & export toolbar
+│   ├── TablePaginationComponent.axaml          # Reusable selection status & pagination navigation bar
 │   └── SchemaPropertiesTableComponent.axaml     # Database schema, table columns, and metadata viewer
 │
 ├── Modals & Dialogs:
@@ -32,19 +35,31 @@ Components/
 │   ├── ConnectDatabaseModalComponent.axaml      # SQL Server connection configuration dialog
 │   ├── ConfirmActionModalComponent.axaml       # Action confirmation & danger alert dialog
 │   ├── ExportDataModalComponent.axaml          # Data export format (CSV/JSON/SQL/TSV) modal
-│   └── SettingsModalComponent.axaml            # Application preferences, theme, and syntax color modal
+│   └── SettingsModalComponent.axaml            # Composed preferences dialog (Theme + Syntax Colors)
+│
+├── Settings Sub-Components:
+│   ├── SettingsCategoriesNavComponent.axaml    # Reusable categories navigation sidebar for settings
+│   ├── ThemeSelectionCardsComponent.axaml      # Reusable Light, Dark, and System theme selection cards
+│   ├── SyntaxColorSelectorComponent.axaml      # Reusable 6-preset SQL syntax keyword color palette
+│   └── LiveSyntaxPreviewComponent.axaml        # Reusable live code snippet preview with dynamic syntax highlighting
 │
 ├── Themes & Design System Components:
 │   ├── Themes/ThemeTokens.axaml                # Componentized shared design metrics & typography
 │   ├── Themes/LightTheme.axaml                 # Light theme semantic color tokens & table brushes
 │   └── Themes/DarkTheme.axaml                  # Dark theme semantic color tokens & table brushes
 │
-└── Layout & Tool Windows:
-    ├── NavbarComponent.axaml                   # Top navigation bar, menu system, and run toolbar
-    ├── SidebarComponent.axaml                  # Collapsible left panel (Object Explorer)
-    ├── FooterComponent.axaml                   # Collapsible & Fullscreen bottom results panel
-    ├── StatusBarComponent.axaml                # Bottom status bar with connection badges
-    └── ToolWindowHeaderComponent.axaml         # Reusable header with title, close, and maximize actions
+├── Layout & Tool Windows:
+│   ├── NavbarComponent.axaml                   # Composed top navigation bar
+│   ├── MainMenuBarComponent.axaml              # Reusable native desktop menu bar, brand icon & connection badge
+│   ├── MainToolbarComponent.axaml              # Reusable execution & document action toolbar
+│   ├── SidebarComponent.axaml                  # Composed collapsible left panel (Object Explorer)
+│   ├── ObjectExplorerEmptyStateComponent.axaml # Reusable empty state connection card for Object Explorer
+│   ├── FooterComponent.axaml                   # Collapsible & Fullscreen bottom results panel
+│   ├── StatusBarComponent.axaml                # Bottom status bar with connection badges
+│   └── ToolWindowHeaderComponent.axaml         # Reusable header with title, close, and maximize actions
+│
+└── Splash & Startup:
+    └── SplashScreenCardComponent.axaml         # Reusable frameless splash card with SQLite loading progress
 ```
 
 ---

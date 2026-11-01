@@ -3,50 +3,13 @@
               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
               xmlns:vm="using:Fdb.ViewModels"
+              xmlns:components="using:Fdb.Components"
               xmlns:ui="using:FluentAvalonia.UI.Controls"
               mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="650"
               x:Class="Fdb.Components.SettingsModalComponent"
               x:DataType="vm:SettingsModalViewModel">
 
-    <UserControl.Styles>
-        <!-- Theme Selection Card Styling -->
-        <Style Selector="Border.theme-card">
-            <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-        <Style Selector="Border.theme-card:pointerover">
-            <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
-            <Setter Property="Background" Value="{DynamicResource AppToolHoverBrush}"/>
-        </Style>
-        <Style Selector="Border.theme-card.active">
-            <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
-            <Setter Property="Background" Value="{DynamicResource AppTabHoverBackgroundBrush}"/>
-        </Style>
-
-        <!-- Color Swatch Card Styling -->
-        <Style Selector="Border.color-card">
-            <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="10,8"/>
-        </Style>
-        <Style Selector="Border.color-card:pointerover">
-            <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
-            <Setter Property="Background" Value="{DynamicResource AppToolHoverBrush}"/>
-        </Style>
-        <Style Selector="Border.color-card.active">
-            <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="Background" Value="{DynamicResource AppTabHoverBackgroundBrush}"/>
-        </Style>
-    </UserControl.Styles>
-
-    <!-- Modal Fullscreen Semi-Transparent Backdrop -->
+    <!-- Composed Settings & Preferences Modal Dialog Component -->
     <Grid IsVisible="{Binding IsOpen}">
         <!-- Semi-transparent Dimming Backdrop (Dismisses modal on click) -->
         <Border Background="{DynamicResource AppModalOverlayBrush}" 
@@ -92,50 +55,8 @@
 
                 <!-- 2. Main Two-Column Body -->
                 <Grid Grid.Row="1" ColumnDefinitions="190, *">
-                    <!-- Left Category Navigation Sidebar -->
-                    <Border Grid.Column="0" 
-                            Background="{DynamicResource AppSurfaceMutedBrush}" 
-                            BorderBrush="{DynamicResource AppBorderBrush}" 
-                            BorderThickness="0,0,1,0" 
-                            Padding="8,12">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="CATEGORIES" 
-                                       FontSize="10" 
-                                       FontWeight="Bold" 
-                                       Foreground="{DynamicResource AppTextMutedBrush}" 
-                                       Margin="8,0,0,6"/>
-
-                            <!-- Active Category Item: Appearance -->
-                            <Border Background="{DynamicResource AppTabActiveBackgroundBrush}" 
-                                    BorderBrush="{DynamicResource AppAccentBrush}" 
-                                    BorderThickness="2,0,0,0" 
-                                    CornerRadius="0,4,4,0" 
-                                    Padding="10,8">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <ui:FASymbolIcon Symbol="Settings" FontSize="13" Foreground="{DynamicResource AppAccentBrush}"/>
-                                    <TextBlock Text="Appearance" 
-                                               FontSize="12" 
-                                               FontWeight="SemiBold" 
-                                               Foreground="{DynamicResource AppAccentBrush}"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Future Extensible Categories (Placeholder badges) -->
-                            <Border Background="Transparent" Padding="10,8" Opacity="0.6">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <ui:FASymbolIcon Symbol="Document" FontSize="13" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                    <TextBlock Text="Editor (General)" FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Background="Transparent" Padding="10,8" Opacity="0.6">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <ui:FASymbolIcon Symbol="Keyboard" FontSize="13" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                    <TextBlock Text="Shortcuts" FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </Border>
+                    <!-- Left Category Navigation Sidebar Component -->
+                    <components:SettingsCategoriesNavComponent Grid.Column="0" DataContext="{Binding}" />
 
                     <!-- Right Category Settings Pane -->
                     <ScrollViewer Grid.Column="1" Padding="20,16">
@@ -153,272 +74,16 @@
 
                             <Separator Background="{DynamicResource AppBorderBrush}" Margin="0,4"/>
 
-                            <!-- Theme Selection Section -->
-                            <TextBlock Text="WORKSPACE THEME" 
-                                       FontSize="11" 
-                                       FontWeight="Bold" 
-                                       Foreground="{DynamicResource AppTextMutedBrush}"/>
-
-                            <Grid RowDefinitions="Auto, Auto, Auto" Margin="0,2">
-                                <!-- Option 1: Light Theme -->
-                                <Border Grid.Row="0" 
-                                        Classes="theme-card"
-                                        Classes.active="{Binding IsLightTheme}"
-                                        PointerPressed="OnLightCardPointerPressed"
-                                        Padding="12,10" 
-                                        Margin="0,0,0,8">
-                                    <Grid ColumnDefinitions="Auto, *, Auto">
-                                        <!-- Mini Preview Swatch -->
-                                        <Border Grid.Column="0" 
-                                                Width="44" 
-                                                Height="30" 
-                                                Background="#FFFFFF" 
-                                                BorderBrush="#CBD5E1" 
-                                                BorderThickness="1" 
-                                                CornerRadius="4" 
-                                                Margin="0,0,12,0">
-                                            <Border Height="8" 
-                                                    VerticalAlignment="Top" 
-                                                    Background="#2563EB" 
-                                                    CornerRadius="3,3,0,0"/>
-                                        </Border>
-
-                                        <!-- Text Details -->
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                                            <TextBlock Text="Light Theme" 
-                                                       FontSize="12" 
-                                                       FontWeight="SemiBold" 
-                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                            <TextBlock Text="Clean, bright desktop workspace with high contrast readability." 
-                                                       FontSize="11" 
-                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                        </StackPanel>
-
-                                        <!-- Selection Indicator Icon -->
-                                        <Border Grid.Column="2" 
-                                                Width="20" 
-                                                Height="20" 
-                                                CornerRadius="10" 
-                                                Background="{DynamicResource AppAccentBrush}" 
-                                                IsVisible="{Binding IsLightTheme}" 
-                                                VerticalAlignment="Center">
-                                            <ui:FASymbolIcon Symbol="Checkmark" FontSize="11" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </Grid>
-                                </Border>
-
-                                <!-- Option 2: Dark Theme -->
-                                <Border Grid.Row="1" 
-                                        Classes="theme-card"
-                                        Classes.active="{Binding IsDarkTheme}"
-                                        PointerPressed="OnDarkCardPointerPressed"
-                                        Padding="12,10" 
-                                        Margin="0,0,0,8">
-                                    <Grid ColumnDefinitions="Auto, *, Auto">
-                                        <!-- Mini Preview Swatch -->
-                                        <Border Grid.Column="0" 
-                                                Width="44" 
-                                                Height="30" 
-                                                Background="#0F172A" 
-                                                BorderBrush="#334155" 
-                                                BorderThickness="1" 
-                                                CornerRadius="4" 
-                                                Margin="0,0,12,0">
-                                            <Border Height="8" 
-                                                    VerticalAlignment="Top" 
-                                                    Background="#3B82F6" 
-                                                    CornerRadius="3,3,0,0"/>
-                                        </Border>
-
-                                        <!-- Text Details -->
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                                            <TextBlock Text="Dark Theme" 
-                                                       FontSize="12" 
-                                                       FontWeight="SemiBold" 
-                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                            <TextBlock Text="Modern dark mode workspace for low-light focus and reduced eye fatigue." 
-                                                       FontSize="11" 
-                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                        </StackPanel>
-
-                                        <!-- Selection Indicator Icon -->
-                                        <Border Grid.Column="2" 
-                                                Width="20" 
-                                                Height="20" 
-                                                CornerRadius="10" 
-                                                Background="{DynamicResource AppAccentBrush}" 
-                                                IsVisible="{Binding IsDarkTheme}" 
-                                                VerticalAlignment="Center">
-                                            <ui:FASymbolIcon Symbol="Checkmark" FontSize="11" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </Grid>
-                                </Border>
-
-                                <!-- Option 3: System Theme (Default) -->
-                                <Border Grid.Row="2" 
-                                        Classes="theme-card"
-                                        Classes.active="{Binding IsSystemTheme}"
-                                        PointerPressed="OnSystemCardPointerPressed"
-                                        Padding="12,10">
-                                    <Grid ColumnDefinitions="Auto, *, Auto">
-                                        <!-- Mini Preview Swatch (Split half light / half dark) -->
-                                        <Grid Grid.Column="0" 
-                                              Width="44" 
-                                              Height="30" 
-                                              Margin="0,0,12,0">
-                                            <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4">
-                                                <Grid ColumnDefinitions="*, *">
-                                                    <Border Grid.Column="1" Background="#0F172A" CornerRadius="0,3,3,0"/>
-                                                </Grid>
-                                            </Border>
-                                        </Grid>
-
-                                        <!-- Text Details -->
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                                            <TextBlock Text="System Theme (Sync with OS)" 
-                                                       FontSize="12" 
-                                                       FontWeight="SemiBold" 
-                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                            <TextBlock Text="Automatically adapt theme based on your Windows appearance settings." 
-                                                       FontSize="11" 
-                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                        </StackPanel>
-
-                                        <!-- Selection Indicator Icon -->
-                                        <Border Grid.Column="2" 
-                                                Width="20" 
-                                                Height="20" 
-                                                CornerRadius="10" 
-                                                Background="{DynamicResource AppAccentBrush}" 
-                                                IsVisible="{Binding IsSystemTheme}" 
-                                                VerticalAlignment="Center">
-                                            <ui:FASymbolIcon Symbol="Checkmark" FontSize="11" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </Grid>
-                                </Border>
-                            </Grid>
+                            <!-- Theme Selection Cards Component -->
+                            <components:ThemeSelectionCardsComponent DataContext="{Binding}" />
 
                             <Separator Background="{DynamicResource AppBorderBrush}" Margin="0,4"/>
 
-                            <!-- SQL Keyword & Syntax Color Customization Section -->
-                            <StackPanel Spacing="3">
-                                <TextBlock Text="SQL SYNTAX &amp; KEYWORD HIGHLIGHTING" 
-                                           FontSize="11" 
-                                           FontWeight="Bold" 
-                                           Foreground="{DynamicResource AppTextMutedBrush}"/>
-                                <TextBlock Text="Choose the accent color for SQL keywords (SELECT, FROM, WHERE) and IntelliSense suggestion badges." 
-                                           FontSize="11" 
-                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            </StackPanel>
+                            <!-- SQL Syntax & Keyword Highlighting Color Presets Component -->
+                            <components:SyntaxColorSelectorComponent DataContext="{Binding}" />
 
-                            <!-- Color Presets Grid (3 Columns x 2 Rows) -->
-                            <Grid ColumnDefinitions="*, *, *" RowDefinitions="Auto, Auto" Margin="0,2">
-                                <!-- 1. Royal Blue -->
-                                <Border Grid.Row="0" Grid.Column="0" 
-                                        Classes="color-card"
-                                        Classes.active="{Binding IsBlueKeyword}"
-                                        PointerPressed="OnBlueColorPointerPressed"
-                                        Margin="0,0,6,6">
-                                    <Grid ColumnDefinitions="Auto, *, Auto">
-                                        <Border Grid.Column="0" Width="14" Height="14" CornerRadius="7" Background="#2563EB" Margin="0,0,8,0"/>
-                                        <TextBlock Grid.Column="1" Text="Royal Blue" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
-                                        <ui:FASymbolIcon Grid.Column="2" Symbol="Checkmark" FontSize="10" Foreground="{DynamicResource AppAccentBrush}" IsVisible="{Binding IsBlueKeyword}"/>
-                                    </Grid>
-                                </Border>
-
-                                <!-- 2. Emerald Green -->
-                                <Border Grid.Row="0" Grid.Column="1" 
-                                        Classes="color-card"
-                                        Classes.active="{Binding IsGreenKeyword}"
-                                        PointerPressed="OnGreenColorPointerPressed"
-                                        Margin="0,0,6,6">
-                                    <Grid ColumnDefinitions="Auto, *, Auto">
-                                        <Border Grid.Column="0" Width="14" Height="14" CornerRadius="7" Background="#059669" Margin="0,0,8,0"/>
-                                        <TextBlock Grid.Column="1" Text="Emerald" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
-                                        <ui:FASymbolIcon Grid.Column="2" Symbol="Checkmark" FontSize="10" Foreground="{DynamicResource AppAccentBrush}" IsVisible="{Binding IsGreenKeyword}"/>
-                                    </Grid>
-                                </Border>
-
-                                <!-- 3. Violet Purple -->
-                                <Border Grid.Row="0" Grid.Column="2" 
-                                        Classes="color-card"
-                                        Classes.active="{Binding IsPurpleKeyword}"
-                                        PointerPressed="OnPurpleColorPointerPressed"
-                                        Margin="0,0,0,6">
-                                    <Grid ColumnDefinitions="Auto, *, Auto">
-                                        <Border Grid.Column="0" Width="14" Height="14" CornerRadius="7" Background="#7C3AED" Margin="0,0,8,0"/>
-                                        <TextBlock Grid.Column="1" Text="Violet" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
-                                        <ui:FASymbolIcon Grid.Column="2" Symbol="Checkmark" FontSize="10" Foreground="{DynamicResource AppAccentBrush}" IsVisible="{Binding IsPurpleKeyword}"/>
-                                    </Grid>
-                                </Border>
-
-                                <!-- 4. Amber Gold -->
-                                <Border Grid.Row="1" Grid.Column="0" 
-                                        Classes="color-card"
-                                        Classes.active="{Binding IsAmberKeyword}"
-                                        PointerPressed="OnAmberColorPointerPressed"
-                                        Margin="0,0,6,0">
-                                    <Grid ColumnDefinitions="Auto, *, Auto">
-                                        <Border Grid.Column="0" Width="14" Height="14" CornerRadius="7" Background="#D97706" Margin="0,0,8,0"/>
-                                        <TextBlock Grid.Column="1" Text="Amber Gold" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
-                                        <ui:FASymbolIcon Grid.Column="2" Symbol="Checkmark" FontSize="10" Foreground="{DynamicResource AppAccentBrush}" IsVisible="{Binding IsAmberKeyword}"/>
-                                    </Grid>
-                                </Border>
-
-                                <!-- 5. Crimson Rose -->
-                                <Border Grid.Row="1" Grid.Column="1" 
-                                        Classes="color-card"
-                                        Classes.active="{Binding IsRoseKeyword}"
-                                        PointerPressed="OnRoseColorPointerPressed"
-                                        Margin="0,0,6,0">
-                                    <Grid ColumnDefinitions="Auto, *, Auto">
-                                        <Border Grid.Column="0" Width="14" Height="14" CornerRadius="7" Background="#E11D48" Margin="0,0,8,0"/>
-                                        <TextBlock Grid.Column="1" Text="Crimson" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
-                                        <ui:FASymbolIcon Grid.Column="2" Symbol="Checkmark" FontSize="10" Foreground="{DynamicResource AppAccentBrush}" IsVisible="{Binding IsRoseKeyword}"/>
-                                    </Grid>
-                                </Border>
-
-                                <!-- 6. Cyan Teal -->
-                                <Border Grid.Row="1" Grid.Column="2" 
-                                        Classes="color-card"
-                                        Classes.active="{Binding IsCyanKeyword}"
-                                        PointerPressed="OnCyanColorPointerPressed">
-                                    <Grid ColumnDefinitions="Auto, *, Auto">
-                                        <Border Grid.Column="0" Width="14" Height="14" CornerRadius="7" Background="#0891B2" Margin="0,0,8,0"/>
-                                        <TextBlock Grid.Column="1" Text="Cyan Teal" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
-                                        <ui:FASymbolIcon Grid.Column="2" Symbol="Checkmark" FontSize="10" Foreground="{DynamicResource AppAccentBrush}" IsVisible="{Binding IsCyanKeyword}"/>
-                                    </Grid>
-                                </Border>
-                            </Grid>
-
-                            <!-- Live Code Preview Card -->
-                            <Border Background="{DynamicResource AppBackgroundBrush}" 
-                                    BorderBrush="{DynamicResource AppBorderBrush}" 
-                                    BorderThickness="1" 
-                                    CornerRadius="6" 
-                                    Padding="14,10" 
-                                    Margin="0,4,0,0">
-                                <StackPanel Spacing="6">
-                                    <Grid ColumnDefinitions="Auto, *">
-                                        <TextBlock Grid.Column="0" Text="LIVE SYNTAX PREVIEW" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AppTextMutedBrush}"/>
-                                        <TextBlock Grid.Column="1" Text="High contrast preserved across themes" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" HorizontalAlignment="Right"/>
-                                    </Grid>
-                                    <Border Background="{DynamicResource AppSurfaceBrush}" 
-                                            BorderBrush="{DynamicResource AppBorderLightBrush}" 
-                                            BorderThickness="1" 
-                                            CornerRadius="4" 
-                                            Padding="10,8">
-                                        <SelectableTextBlock FontFamily="{DynamicResource AppFontFamilyMonospace}" FontSize="12">
-                                            <Run Text="SELECT " Foreground="{DynamicResource AppKeywordBrush}" FontWeight="SemiBold" />
-                                            <Run Text="u.id, u.name, u.email " Foreground="{DynamicResource AppTextPrimaryBrush}" />
-                                            <Run Text="FROM " Foreground="{DynamicResource AppKeywordBrush}" FontWeight="SemiBold" />
-                                            <Run Text="users u " Foreground="{DynamicResource AppTextPrimaryBrush}" />
-                                            <Run Text="WHERE " Foreground="{DynamicResource AppKeywordBrush}" FontWeight="SemiBold" />
-                                            <Run Text="u.active = 1;" Foreground="{DynamicResource AppTextPrimaryBrush}" />
-                                        </SelectableTextBlock>
-                                    </Border>
-                                </StackPanel>
-                            </Border>
+                            <!-- Live Code Syntax Preview Box Component -->
+                            <components:LiveSyntaxPreviewComponent DataContext="{Binding}" />
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
