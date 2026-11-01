@@ -1,0 +1,123 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:vm="using:Fdb.ViewModels"
+              xmlns:ui="using:FluentAvalonia.UI.Controls"
+              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="120"
+              x:Class="Fdb.Components.SyntaxColorSelectorComponent"
+              x:DataType="vm:SettingsModalViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="Border.color-card">
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="10,8"/>
+        </Style>
+        <Style Selector="Border.color-card:pointerover">
+            <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource AppToolHoverBrush}"/>
+        </Style>
+        <Style Selector="Border.color-card.active">
+            <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Background" Value="{DynamicResource AppTabHoverBackgroundBrush}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <!-- Reusable SQL Syntax & Keyword Highlighting Color Presets Grid Component -->
+    <StackPanel Spacing="6">
+        <StackPanel Spacing="2">
+            <TextBlock Text="SQL SYNTAX &amp; KEYWORD HIGHLIGHTING" 
+                       FontSize="11" 
+                       FontWeight="Bold" 
+                       Foreground="{DynamicResource AppTextMutedBrush}"/>
+            <TextBlock Text="Choose the accent color for SQL keywords (SELECT, FROM, WHERE) and IntelliSense suggestion badges." 
+                       FontSize="11" 
+                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+        </StackPanel>
+
+        <!-- Color Presets Grid (3 Columns x 2 Rows) -->
+        <Grid ColumnDefinitions="*, *, *" RowDefinitions="Auto, Auto" Margin="0,2">
+            <!-- 1. Royal Blue -->
+            <Border Grid.Row="0" Grid.Column="0" 
+                    Classes="color-card"
+                    Classes.active="{Binding IsBlueKeyword}"
+                    PointerPressed="OnBlueColorPointerPressed"
+                    Margin="0,0,6,6">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Border Grid.Column="0" Width="14" Height="14" CornerRadius="7" Background="#2563EB" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Column="1" Text="Royal Blue" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
+                    <ui:FASymbolIcon Grid.Column="2" Symbol="Checkmark" FontSize="10" Foreground="{DynamicResource AppAccentBrush}" IsVisible="{Binding IsBlueKeyword}"/>
+                </Grid>
+            </Border>
+
+            <!-- 2. Emerald Green -->
+            <Border Grid.Row="0" Grid.Column="1" 
+                    Classes="color-card"
+                    Classes.active="{Binding IsGreenKeyword}"
+                    PointerPressed="OnGreenColorPointerPressed"
+                    Margin="0,0,6,6">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Border Grid.Column="0" Width="14" Height="14" CornerRadius="7" Background="#059669" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Column="1" Text="Emerald" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
+                    <ui:FASymbolIcon Grid.Column="2" Symbol="Checkmark" FontSize="10" Foreground="{DynamicResource AppAccentBrush}" IsVisible="{Binding IsGreenKeyword}"/>
+                </Grid>
+            </Border>
+
+            <!-- 3. Violet Purple -->
+            <Border Grid.Row="0" Grid.Column="2" 
+                    Classes="color-card"
+                    Classes.active="{Binding IsPurpleKeyword}"
+                    PointerPressed="OnPurpleColorPointerPressed"
+                    Margin="0,0,0,6">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Border Grid.Column="0" Width="14" Height="14" CornerRadius="7" Background="#7C3AED" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Column="1" Text="Violet" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
+                    <ui:FASymbolIcon Grid.Column="2" Symbol="Checkmark" FontSize="10" Foreground="{DynamicResource AppAccentBrush}" IsVisible="{Binding IsPurpleKeyword}"/>
+                </Grid>
+            </Border>
+
+            <!-- 4. Amber Gold -->
+            <Border Grid.Row="1" Grid.Column="0" 
+                    Classes="color-card"
+                    Classes.active="{Binding IsAmberKeyword}"
+                    PointerPressed="OnAmberColorPointerPressed"
+                    Margin="0,0,6,0">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Border Grid.Column="0" Width="14" Height="14" CornerRadius="7" Background="#D97706" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Column="1" Text="Amber Gold" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
+                    <ui:FASymbolIcon Grid.Column="2" Symbol="Checkmark" FontSize="10" Foreground="{DynamicResource AppAccentBrush}" IsVisible="{Binding IsAmberKeyword}"/>
+                </Grid>
+            </Border>
+
+            <!-- 5. Crimson Rose -->
+            <Border Grid.Row="1" Grid.Column="1" 
+                    Classes="color-card"
+                    Classes.active="{Binding IsRoseKeyword}"
+                    PointerPressed="OnRoseColorPointerPressed"
+                    Margin="0,0,6,0">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Border Grid.Column="0" Width="14" Height="14" CornerRadius="7" Background="#E11D48" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Column="1" Text="Crimson" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
+                    <ui:FASymbolIcon Grid.Column="2" Symbol="Checkmark" FontSize="10" Foreground="{DynamicResource AppAccentBrush}" IsVisible="{Binding IsRoseKeyword}"/>
+                </Grid>
+            </Border>
+
+            <!-- 6. Cyan Teal -->
+            <Border Grid.Row="1" Grid.Column="2" 
+                    Classes="color-card"
+                    Classes.active="{Binding IsCyanKeyword}"
+                    PointerPressed="OnCyanColorPointerPressed">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Border Grid.Column="0" Width="14" Height="14" CornerRadius="7" Background="#0891B2" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Column="1" Text="Cyan Teal" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
+                    <ui:FASymbolIcon Grid.Column="2" Symbol="Checkmark" FontSize="10" Foreground="{DynamicResource AppAccentBrush}" IsVisible="{Binding IsCyanKeyword}"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </StackPanel>
+</UserControl>

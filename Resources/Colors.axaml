@@ -2,52 +2,17 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- ======================================================== -->
-    <!-- Modern Desktop Design Tokens (VS Code / JetBrains Light) -->
+    <!-- Fdb Studio Design System: Modular Theme Includes         -->
+    <!-- Componentized Light / Dark Palettes and Tokens           -->
     <!-- ======================================================== -->
 
-    <!-- Base Colors -->
-    <Color x:Key="AppControlFaceColor">#F8FAFC</Color>
-    <Color x:Key="AppWindowBackgroundColor">#FFFFFF</Color>
-    <Color x:Key="AppWorkspaceColor">#FFFFFF</Color>
-    <Color x:Key="AppBorderColor">#E2E8F0</Color>
-    <Color x:Key="AppBorderLightColor">#F1F5F9</Color>
-    <Color x:Key="AppBorderDarkColor">#CBD5E1</Color>
-    <Color x:Key="AppTextPrimaryColor">#0F172A</Color>
-    <Color x:Key="AppTextSecondaryColor">#475569</Color>
-    <Color x:Key="AppTextMutedColor">#94A3B8</Color>
-    <Color x:Key="AppAccentColor">#2563EB</Color>
-    <Color x:Key="AppAccentHoverColor">#1D4ED8</Color>
-    <Color x:Key="AppSplitterColor">#E2E8F0</Color>
-    <Color x:Key="AppSplitterHoverColor">#3B82F6</Color>
-    <Color x:Key="AppTabSelectedColor">#FFFFFF</Color>
-    <Color x:Key="AppTabUnselectedColor">#F8FAFC</Color>
-    <Color x:Key="AppTabHoverColor">#F1F5F9</Color>
-    <Color x:Key="AppHeaderBgColor">#F8FAFC</Color>
-    <Color x:Key="AppToolHoverBgColor">#F1F5F9</Color>
-    <Color x:Key="AppToolHoverBorderColor">#CBD5E1</Color>
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://Fdb/Themes/ThemeTokens.axaml" />
+    </ResourceDictionary.MergedDictionaries>
 
-    <!-- Semantic SolidColorBrushes -->
-    <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource AppWindowBackgroundColor}" />
-    <SolidColorBrush x:Key="AppControlFaceBrush" Color="{StaticResource AppControlFaceColor}" />
-    <SolidColorBrush x:Key="AppSurfaceBrush" Color="{StaticResource AppControlFaceColor}" />
-    <SolidColorBrush x:Key="AppSurfaceMutedBrush" Color="{StaticResource AppHeaderBgColor}" />
-    <SolidColorBrush x:Key="AppBorderBrush" Color="{StaticResource AppBorderColor}" />
-    <SolidColorBrush x:Key="AppBorderLightBrush" Color="{StaticResource AppBorderLightColor}" />
-    <SolidColorBrush x:Key="AppBorderDarkBrush" Color="{StaticResource AppBorderDarkColor}" />
-    <SolidColorBrush x:Key="AppTextPrimaryBrush" Color="{StaticResource AppTextPrimaryColor}" />
-    <SolidColorBrush x:Key="AppTextSecondaryBrush" Color="{StaticResource AppTextSecondaryColor}" />
-    <SolidColorBrush x:Key="AppTextMutedBrush" Color="{StaticResource AppTextMutedColor}" />
-    <SolidColorBrush x:Key="AppAccentBrush" Color="{StaticResource AppAccentColor}" />
-    <SolidColorBrush x:Key="AppAccentHoverBrush" Color="{StaticResource AppAccentHoverColor}" />
-    <SolidColorBrush x:Key="AppSplitterBrush" Color="{StaticResource AppSplitterColor}" />
-    <SolidColorBrush x:Key="AppSplitterHoverBrush" Color="{StaticResource AppSplitterHoverColor}" />
-    <SolidColorBrush x:Key="AppTabActiveBackgroundBrush" Color="{StaticResource AppTabSelectedColor}" />
-    <SolidColorBrush x:Key="AppTabInactiveBackgroundBrush" Color="{StaticResource AppTabUnselectedColor}" />
-    <SolidColorBrush x:Key="AppTabHoverBackgroundBrush" Color="{StaticResource AppTabHoverColor}" />
-    <SolidColorBrush x:Key="AppTabActiveBorderBrush" Color="{StaticResource AppAccentColor}" />
-    <SolidColorBrush x:Key="AppEditorBackgroundBrush" Color="{StaticResource AppWorkspaceColor}" />
-    <SolidColorBrush x:Key="AppEditorForegroundBrush" Color="{StaticResource AppTextPrimaryColor}" />
-    <SolidColorBrush x:Key="AppToolHoverBrush" Color="{StaticResource AppToolHoverBgColor}" />
-    <SolidColorBrush x:Key="AppToolHoverBorderBrush" Color="{StaticResource AppToolHoverBorderColor}" />
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceInclude x:Key="Light" Source="avares://Fdb/Themes/LightTheme.axaml" />
+        <ResourceInclude x:Key="Dark" Source="avares://Fdb/Themes/DarkTheme.axaml" />
+    </ResourceDictionary.ThemeDictionaries>
 
 </ResourceDictionary>

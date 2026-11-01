@@ -58,7 +58,7 @@ public partial class MainWindow : Window
 
     private void OnFooterPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(FooterViewModel.IsVisible))
+        if (e.PropertyName == nameof(FooterViewModel.IsVisible) || e.PropertyName == nameof(FooterViewModel.IsMaximized))
         {
             UpdateFooterLayout();
         }
@@ -127,12 +127,39 @@ public partial class MainWindow : Window
 
         if (_viewModel.Footer.IsVisible)
         {
-            row.MinHeight = 70;
-            row.MaxHeight = 450;
-            double h = _lastFooterHeight.Value;
-            if (h < 70) h = 140;
-            if (h > 450) h = 450;
-            row.Height = new GridLength(h, GridUnitType.Pixel);
+            if (_viewModel.Footer.IsMaximized)
+            {
+                // Maximize Footer / Excel to fill entire workspace height
+                CenterGrid.RowDefinitions[0].MinHeight = 0;
+                CenterGrid.RowDefinitions[0].Height = new GridLength(0, GridUnitType.Pixel);
+                CenterGrid.RowDefinitions[1].Height = new GridLength(0, GridUnitType.Pixel);
+                if (FooterSplitter != null)
+                {
+                    FooterSplitter.IsVisible = false;
+                }
+
+                row.MinHeight = 0;
+                row.MaxHeight = double.PositiveInfinity;
+                row.Height = new GridLength(1, GridUnitType.Star);
+            }
+            else
+            {
+                // Restore standard split workspace layout
+                CenterGrid.RowDefinitions[0].MinHeight = 180;
+                CenterGrid.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);
+                CenterGrid.RowDefinitions[1].Height = GridLength.Auto;
+                if (FooterSplitter != null)
+                {
+                    FooterSplitter.IsVisible = true;
+                }
+
+                row.MinHeight = 70;
+                row.MaxHeight = 450;
+                double h = _lastFooterHeight.Value;
+                if (h < 70) h = 140;
+                if (h > 450) h = 450;
+                row.Height = new GridLength(h, GridUnitType.Pixel);
+            }
         }
         else
         {
@@ -142,18 +169,87 @@ public partial class MainWindow : Window
             }
             row.MinHeight = 0;
             row.Height = new GridLength(0, GridUnitType.Pixel);
+            CenterGrid.RowDefinitions[0].MinHeight = 180;
+            CenterGrid.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);
+            if (FooterSplitter != null)
+            {
+                FooterSplitter.IsVisible = false;
+            }
         }
-
-        // Ensure editor workspace takes all remaining vertical space
-        CenterGrid.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
 
-        // Escape dismisses any open modal dialog cleanly
-        if (e.Key == Key.Escape && _viewModel != null)
+        if (_viewModel == null) return;
+
+        // Toggle Fullscreen Table/Footer via F11 or Ctrl+Shift+F
+        if (e.Key == Key.F11 || (e.KeyModifiers.HasFlag(KeyModifiers.Control) && e.KeyModifiers.HasFlag(KeyModifiers.Shift) && e.Key == Key.F))
+        {
+            _viewModel.ToggleFooterMaximizedCommand.Execute(null);
+            e.Handled = true;
+            return;
+        }
+
+        // F5: Run active SQL query
+        if (e.Key == Key.F5)
+        {
+            _viewModel.ExecuteQueryCommand.Execute(null);
+            e.Handled = true;
+            return;
+        }
+
+        // Ctrl+S: Save current query
+        if (e.Key == Key.S && e.KeyModifiers == KeyModifiers.Control)
+        {
+            _viewModel.SaveQueryCommand.Execute(null);
+            e.Handled = true;
+            return;
+        }
+
+        // Ctrl+N: New query tab
+        if (e.Key == Key.N && e.KeyModifiers == KeyModifiers.Control)
+        {
+            _viewModel.Editor.AddTabCommand.Execute(null);
+            e.Handled = true;
+            return;
+        }
+
+        // Ctrl+,: Open Settings
+        if (e.Key == Key.OemComma && e.KeyModifiers == KeyModifiers.Control)
+        {
+            _viewModel.SettingsModal.OpenCommand.Execute(null);
+            e.Handled = true;
+            return;
+        }
+
+        // Ctrl + + / Ctrl + Add: Zoom In SQL Editor Text
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Control) && (e.Key is Key.OemPlus or Key.Add))
+        {
+            MainEditor?.ZoomIn();
+            e.Handled = true;
+            return;
+        }
+
+        // Ctrl + - / Ctrl + Subtract: Zoom Out SQL Editor Text
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Control) && (e.Key is Key.OemMinus or Key.Subtract))
+        {
+            MainEditor?.ZoomOut();
+            e.Handled = true;
+            return;
+        }
+
+        // Ctrl + 0: Reset SQL Editor Zoom
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Control) && (e.Key is Key.D0 or Key.NumPad0))
+        {
+            MainEditor?.ResetZoom();
+            e.Handled = true;
+            return;
+        }
+
+        // Escape dismisses any open modal dialog cleanly, or restores footer if maximized
+        if (e.Key == Key.Escape)
         {
             if (_viewModel.ConnectModal.IsOpen)
             {
@@ -168,6 +264,16 @@ public partial class MainWindow : Window
             else if (_viewModel.ExportModal.IsOpen)
             {
                 _viewModel.ExportModal.IsOpen = false;
+                e.Handled = true;
+            }
+            else if (_viewModel.SettingsModal.IsOpen)
+            {
+                _viewModel.SettingsModal.CloseCommand.Execute(null);
+                e.Handled = true;
+            }
+            else if (_viewModel.Footer.IsMaximized)
+            {
+                _viewModel.Footer.IsMaximized = false;
                 e.Handled = true;
             }
         }

@@ -1,164 +1,51 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:Fdb.ViewModels"
-             xmlns:ae="using:AvaloniaEdit"
-             xmlns:ui="using:FluentAvalonia.UI.Controls"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
-             x:Class="Fdb.Components.EditorComponent"
-             x:DataType="vm:EditorViewModel">
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:vm="using:Fdb.ViewModels"
+              xmlns:components="using:Fdb.Components"
+              xmlns:ae="using:AvaloniaEdit"
+              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
+              x:Class="Fdb.Components.EditorComponent"
+              x:DataType="vm:EditorViewModel">
 
-    <UserControl.Styles>
-        <!-- Active Tab Container Styling -->
-        <Style Selector="Border.editor-tab.active">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
-        </Style>
-        <Style Selector="Border.editor-tab:not(.active)">
-            <Setter Property="Background" Value="#F8FAFC"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
-        </Style>
-        <Style Selector="Border.editor-tab:not(.active):pointerover">
-            <Setter Property="Background" Value="#F1F5F9"/>
-        </Style>
-
-        <!-- Active Tab Title Color & Weight -->
-        <Style Selector="Border.editor-tab.active TextBlock.tab-title">
-            <Setter Property="Foreground" Value="#2563EB"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-        </Style>
-        <Style Selector="Border.editor-tab:not(.active) TextBlock.tab-title">
-            <Setter Property="Foreground" Value="#64748B"/>
-            <Setter Property="FontWeight" Value="Normal"/>
-        </Style>
-
-        <!-- Active Tab Icon -->
-        <Style Selector="Border.editor-tab.active TextBlock.tab-icon">
-            <Setter Property="Foreground" Value="#2563EB"/>
-        </Style>
-        <Style Selector="Border.editor-tab:not(.active) TextBlock.tab-icon">
-            <Setter Property="Foreground" Value="#94A3B8"/>
-        </Style>
-    </UserControl.Styles>
-
-    <!-- Modern SQL Editor Workspace with Blue Active Tab & IntelliSense -->
+    <!-- Composed SQL Editor Workspace Component: EditorTabStripComponent + Code Canvas + IntelliSense -->
     <Border Background="{DynamicResource AppSurfaceBrush}">
         <Grid RowDefinitions="Auto, *">
             
-            <!-- 1. Auto-Expanding Document Tabs Strip -->
-            <Border Grid.Row="0" 
-                    Background="{DynamicResource AppSurfaceBrush}" 
-                    BorderBrush="{DynamicResource AppBorderBrush}" 
-                    BorderThickness="0,0,0,1" 
-                    Padding="4,4,4,0">
-                <Grid ColumnDefinitions="*, Auto">
-                    <!-- Tabs automatically expand and take full available width via UniformGrid -->
-                    <ItemsControl Grid.Column="0" ItemsSource="{Binding Tabs}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Rows="1" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <!-- Clickable Tab Container -->
-                                <Border Classes="editor-tab"
-                                        Classes.active="{Binding IsActive}"
-                                        BorderThickness="1,1,1,0" 
-                                        CornerRadius="4,4,0,0"
-                                        Margin="1,0"
-                                        HorizontalAlignment="Stretch"
-                                        PointerPressed="OnTabPointerPressed"
-                                        Cursor="Hand">
-                                    <!-- Right-Click Context Menu -->
-                                    <Border.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="Close" 
-                                                      Command="{Binding $parent[UserControl].((vm:EditorViewModel)DataContext).CloseTabCommand}" 
-                                                      CommandParameter="{Binding}" />
-                                            <MenuItem Header="Close Others" 
-                                                      Command="{Binding $parent[UserControl].((vm:EditorViewModel)DataContext).CloseOtherTabsCommand}" 
-                                                      CommandParameter="{Binding}" />
-                                            <Separator />
-                                            <MenuItem Header="Close All" 
-                                                      Command="{Binding $parent[UserControl].((vm:EditorViewModel)DataContext).CloseAllTabsCommand}" />
-                                        </ContextMenu>
-                                    </Border.ContextMenu>
+            <!-- 1. Auto-Expanding Document Tabs Strip Component -->
+            <components:EditorTabStripComponent x:Name="TabStrip" 
+                                                Grid.Row="0" 
+                                                DataContext="{Binding}" 
+                                                TabSelected="OnTabStripTabSelected" />
 
-                                    <Grid RowDefinitions="Auto, *">
-                                        <!-- Blue Active Indicator Strip at Top of Tab -->
-                                        <Border Grid.Row="0" 
-                                                Height="2.5" 
-                                                Background="#2563EB" 
-                                                IsVisible="{Binding IsActive}" 
-                                                HorizontalAlignment="Stretch"/>
-
-                                        <!-- Tab Header Body -->
-                                        <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto" Margin="8,5">
-                                            <!-- Document Icon (Blue when Active) -->
-                                            <ui:FASymbolIcon Grid.Column="0" 
-                                                             Symbol="Document" 
-                                                             FontSize="11" 
-                                                             Margin="0,0,6,0" 
-                                                             VerticalAlignment="Center"/>
-
-                                            <!-- Tab Title (Blue & SemiBold when Active) -->
-                                            <TextBlock Grid.Column="1" 
-                                                       Classes="tab-title"
-                                                       Text="{Binding Title}" 
-                                                       FontSize="11" 
-                                                       VerticalAlignment="Center"
-                                                       HorizontalAlignment="Left"
-                                                       TextTrimming="CharacterEllipsis"/>
-
-                                            <!-- Close Button -->
-                                            <Button Grid.Column="2" 
-                                                    Command="{Binding $parent[UserControl].((vm:EditorViewModel)DataContext).CloseTabCommand}"
-                                                    CommandParameter="{Binding}"
-                                                    Classes="classic-menu-btn" 
-                                                    Padding="4,2" 
-                                                    MinHeight="14"
-                                                    Margin="4,0,0,0">
-                                                <ui:FASymbolIcon Symbol="Dismiss" FontSize="8"/>
-                                            </Button>
-                                        </Grid>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
-                    <!-- Add Tab Button -->
-                    <Button Grid.Column="1" 
-                            Command="{Binding AddTabCommand}" 
-                            Classes="classic-menu-btn" 
-                            Padding="8,4" 
-                            MinHeight="24"
-                            Margin="4,0,0,0"
-                            ToolTip.Tip="New SQL Query Tab">
-                        <ui:FASymbolIcon Symbol="Add" FontSize="11"/>
-                    </Button>
-                </Grid>
-            </Border>
-
-            <!-- 2. Text Editor Canvas with SQL Syntax Highlighting & Autocomplete -->
+            <!-- 2. Text Editor Canvas with SQL Syntax Highlighting & IntelliSense Overlay -->
             <Border Grid.Row="1" 
                     Background="{DynamicResource AppWorkspaceBrush}" 
                     BorderBrush="{DynamicResource AppBorderBrush}" 
                     BorderThickness="1" 
-                    CornerRadius="4"
-                    Margin="6">
-                <ae:TextEditor Name="CodeEditor"
-                               ShowLineNumbers="True"
-                               FontFamily="Cascadia Code, Consolas, Courier New, monospace"
-                               FontSize="13"
-                               Foreground="{DynamicResource AppEditorForegroundBrush}"
-                               Background="{DynamicResource AppEditorBackgroundBrush}"
-                               HorizontalScrollBarVisibility="Auto"
-                               VerticalScrollBarVisibility="Auto"
-                               WordWrap="False"
-                               Margin="4"/>
+                    CornerRadius="4" 
+                    Margin="6" 
+                    ClipToBounds="True">
+                <Grid>
+                    <ae:TextEditor Name="CodeEditor"
+                                   ShowLineNumbers="True"
+                                   FontFamily="{DynamicResource AppFontFamilyMonospace}"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource AppEditorForegroundBrush}"
+                                   Background="{DynamicResource AppEditorBackgroundBrush}"
+                                   HorizontalScrollBarVisibility="Auto"
+                                   VerticalScrollBarVisibility="Auto"
+                                   WordWrap="False"
+                                   Margin="4"/>
+
+                    <!-- In-Place Autocomplete Floating Card Overlay (Modular Reusable Component) -->
+                    <Canvas Name="CompletionOverlayCanvas" ClipToBounds="True">
+                        <components:SqlIntelliSenseOverlayComponent x:Name="IntelliSenseOverlay"
+                                                                    IsVisible="False"
+                                                                    ItemCommitted="OnIntelliSenseItemCommitted" />
+                    </Canvas>
+                </Grid>
             </Border>
         </Grid>
     </Border>

@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:vm="using:Fdb.ViewModels"
+              xmlns:components="using:Fdb.Components"
+              xmlns:ui="using:FluentAvalonia.UI.Controls"
+              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="650"
+              x:Class="Fdb.Components.SettingsModalComponent"
+              x:DataType="vm:SettingsModalViewModel">
+
+    <!-- Composed Settings & Preferences Modal Dialog Component -->
+    <Grid IsVisible="{Binding IsOpen}">
+        <!-- Semi-transparent Dimming Backdrop (Dismisses modal on click) -->
+        <Border Background="{DynamicResource AppModalOverlayBrush}" 
+                PointerPressed="OnBackdropPointerPressed" />
+
+        <!-- Centered Settings Dialog Card -->
+        <Border Width="700" 
+                Height="540" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center"
+                Background="{DynamicResource AppSurfaceBrush}" 
+                BorderBrush="{DynamicResource AppBorderBrush}" 
+                BorderThickness="1" 
+                CornerRadius="8"
+                BoxShadow="0 12 36 #40000000"
+                ClipToBounds="True">
+            <Grid RowDefinitions="Auto, *, Auto">
+                
+                <!-- 1. Header Bar -->
+                <Border Grid.Row="0" 
+                        Background="{DynamicResource AppBackgroundBrush}" 
+                        BorderBrush="{DynamicResource AppBorderBrush}" 
+                        BorderThickness="0,0,0,1" 
+                        Padding="16,12">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <ui:FASymbolIcon Symbol="Settings" FontSize="14" Foreground="{DynamicResource AppAccentBrush}"/>
+                            <TextBlock Text="Preferences &amp; Settings" 
+                                       FontSize="13" 
+                                       FontWeight="Bold" 
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        </StackPanel>
+                        
+                        <!-- Close 'X' Button -->
+                        <Button Grid.Column="2" 
+                                Command="{Binding CloseCommand}" 
+                                Classes="classic-menu-btn" 
+                                Padding="6,4">
+                            <ui:FASymbolIcon Symbol="Dismiss" FontSize="11"/>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- 2. Main Two-Column Body -->
+                <Grid Grid.Row="1" ColumnDefinitions="190, *">
+                    <!-- Left Category Navigation Sidebar Component -->
+                    <components:SettingsCategoriesNavComponent Grid.Column="0" DataContext="{Binding}" />
+
+                    <!-- Right Category Settings Pane -->
+                    <ScrollViewer Grid.Column="1" Padding="20,16">
+                        <StackPanel Spacing="16">
+                            <!-- Section Title -->
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="Appearance &amp; Color Theme" 
+                                           FontSize="15" 
+                                           FontWeight="Bold" 
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                <TextBlock Text="Choose how Fdb Studio looks and feels. Changes preview instantly." 
+                                           FontSize="11" 
+                                           Foreground="{DynamicResource AppTextMutedBrush}"/>
+                            </StackPanel>
+
+                            <Separator Background="{DynamicResource AppBorderBrush}" Margin="0,4"/>
+
+                            <!-- Theme Selection Cards Component -->
+                            <components:ThemeSelectionCardsComponent DataContext="{Binding}" />
+
+                            <Separator Background="{DynamicResource AppBorderBrush}" Margin="0,4"/>
+
+                            <!-- SQL Syntax & Keyword Highlighting Color Presets Component -->
+                            <components:SyntaxColorSelectorComponent DataContext="{Binding}" />
+
+                            <!-- Live Code Syntax Preview Box Component -->
+                            <components:LiveSyntaxPreviewComponent DataContext="{Binding}" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- 3. Bottom Action Buttons Bar -->
+                <Border Grid.Row="2" 
+                        Background="{DynamicResource AppBackgroundBrush}" 
+                        BorderBrush="{DynamicResource AppBorderBrush}" 
+                        BorderThickness="0,1,0,0" 
+                        Padding="16,10">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <Button Content="Cancel" 
+                                    Command="{Binding CloseCommand}" 
+                                    Classes="classic-tool-btn" 
+                                    Padding="14,6"/>
+
+                            <Button Content="Save &amp; Apply" 
+                                    Command="{Binding SaveCommand}" 
+                                    Background="{DynamicResource AppAccentBrush}" 
+                                    Foreground="White" 
+                                    FontWeight="SemiBold" 
+                                    Padding="18,6" 
+                                    CornerRadius="4" 
+                                    BorderThickness="0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -11,6 +11,9 @@ public partial class FooterViewModel : ViewModelBase
     private bool _isVisible = true;
 
     [ObservableProperty]
+    private bool _isMaximized;
+
+    [ObservableProperty]
     private string _selectedTab = "Terminal";
 
     public ObservableCollection<string> Tabs { get; } = new()
@@ -30,11 +33,26 @@ public partial class FooterViewModel : ViewModelBase
     private void ToggleVisibility()
     {
         IsVisible = !IsVisible;
+        if (!IsVisible)
+        {
+            IsMaximized = false;
+        }
+    }
+
+    [RelayCommand]
+    public void ToggleMaximize()
+    {
+        IsMaximized = !IsMaximized;
+        if (IsMaximized)
+        {
+            IsVisible = true;
+        }
     }
 
     [RelayCommand]
     private void ClosePanel()
     {
+        IsMaximized = false;
         IsVisible = false;
     }
 

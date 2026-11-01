@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
+using Fdb.Services;
 using Fdb.ViewModels;
 
 namespace Fdb.Views;
@@ -10,6 +11,7 @@ namespace Fdb.Views;
 public partial class SplashScreenWindow : Window
 {
     private bool _isDismissed;
+    private bool _isDatabaseReady;
     private readonly TaskCompletionSource<bool> _dismissTcs = new();
 
     public SplashScreenViewModel ViewModel { get; } = new();
@@ -24,12 +26,15 @@ public partial class SplashScreenWindow : Window
 
     private void OnWindowPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        Dismiss();
+        if (_isDatabaseReady)
+        {
+            Dismiss();
+        }
     }
 
     private void OnWindowKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key is Key.Escape or Key.Space or Key.Enter)
+        if (e.Key is Key.Escape or Key.Space or Key.Enter && _isDatabaseReady)
         {
             Dismiss();
         }
@@ -42,48 +47,45 @@ public partial class SplashScreenWindow : Window
         _dismissTcs.TrySetResult(true);
     }
 
-    public async Task RunStartupSequenceAsync(int durationMs = 3000)
+    public async Task RunStartupSequenceAsync(int durationMs = 0)
     {
         var vm = ViewModel;
-        int steps = 4;
-        int delayPerStep = durationMs / steps;
+        _isDatabaseReady = false;
 
-        void SetStep(int s)
+        void UpdateProgress(double progress, string status)
         {
-            switch (s)
+            vm.ProgressValue = progress;
+            vm.StatusText = status;
+            if (!Dispatcher.UIThread.CheckAccess())
             {
-                case 1:
-                    vm.StatusText = "Initializing Core Runtime & Workspace...";
-                    vm.ProgressValue = 25;
-                    break;
-                case 2:
-                    vm.StatusText = "Loading SQL Keywords, IntelliSense & Syntax Highlighting...";
-                    vm.ProgressValue = 50;
-                    break;
-                case 3:
-                    vm.StatusText = "Scanning Database Drivers & Local Instances...";
-                    vm.ProgressValue = 75;
-                    break;
-                case 4:
-                    vm.StatusText = "Starting Studio Environment...";
-                    vm.ProgressValue = 100;
-                    break;
+                Dispatcher.UIThread.Post(() =>
+                {
+                    vm.ProgressValue = progress;
+                    vm.StatusText = status;
+                });
             }
         }
 
-        for (int i = 1; i <= steps; i++)
+        UpdateProgress(5, "Connecting to SQLite Storage Engine...");
+
+        // Execute real SQLite queries from Assets/init_database.sql
+        await DatabaseStorageService.Instance.InitializeWithProgressAsync((progress, status) =>
         {
-            if (_isDismissed) break;
+            UpdateProgress(progress, status);
+        }).ConfigureAwait(false);
 
-            int step = i;
-            SetStep(step);
+        // Load and apply saved user theme and keyword syntax color from SQLite during splash screen
+        UpdateProgress(95, "Applying User Appearance & Theme Preferences...");
+        string savedTheme = await DatabaseStorageService.Instance.GetThemeAsync().ConfigureAwait(false);
+        ThemeService.Instance.ApplyTheme(savedTheme);
+        string savedKeywordColor = await DatabaseStorageService.Instance.GetKeywordColorAsync().ConfigureAwait(false);
+        ThemeService.Instance.SetKeywordColor(savedKeywordColor);
 
-            var delayTask = Task.Delay(delayPerStep);
-            var completedTask = await Task.WhenAny(delayTask, _dismissTcs.Task).ConfigureAwait(false);
-            if (completedTask == _dismissTcs.Task)
-            {
-                break;
-            }
-        }
+        _isDatabaseReady = true;
+
+        UpdateProgress(100, "Studio Environment Ready — SQLite Engine Initialized.");
+
+        // Short smooth transition grace period so 100% progress is cleanly visible
+        await Task.Delay(180).ConfigureAwait(false);
     }
 }

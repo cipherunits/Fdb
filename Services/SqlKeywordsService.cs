@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Fdb.Services;
 
@@ -14,58 +13,24 @@ public class SqlSnippet
     public string Description { get; set; } = string.Empty;
 }
 
-public class SqlKeywordsData
-{
-    public List<string> Keywords { get; set; } = new();
-    public List<SqlSnippet> Snippets { get; set; } = new();
-}
-
 public class SqlKeywordsService
 {
     private static SqlKeywordsService? _instance;
     public static SqlKeywordsService Instance => _instance ??= new SqlKeywordsService();
 
+    public string CurrentDialect { get; private set; } = "MSSQL";
     public List<string> Keywords { get; private set; } = new();
     public List<SqlSnippet> Snippets { get; private set; } = new();
     public Regex? KeywordRegex { get; private set; }
 
     public SqlKeywordsService()
     {
-        LoadKeywords();
+        // 1. Initial fast fallback keywords (for zero-latency UI initialization)
+        LoadDefaultFallbackKeywords();
     }
 
-    private void LoadKeywords()
+    private void LoadDefaultFallbackKeywords()
     {
-        try
-        {
-            // 1. Try to load from Assets/sql_keywords.json on disk
-            string localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "sql_keywords.json");
-            if (!File.Exists(localPath))
-            {
-                // Try from project directory
-                localPath = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "sql_keywords.json");
-            }
-
-            if (File.Exists(localPath))
-            {
-                string json = File.ReadAllText(localPath);
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var data = JsonSerializer.Deserialize<SqlKeywordsData>(json, options);
-                if (data != null && data.Keywords.Count > 0)
-                {
-                    Keywords = data.Keywords;
-                    Snippets = data.Snippets;
-                    BuildRegex();
-                    return;
-                }
-            }
-        }
-        catch
-        {
-            // Fallback below
-        }
-
-        // Fallback default keywords
         Keywords = new List<string>
         {
             "SELECT", "FROM", "WHERE", "INSERT", "INTO", "VALUES", "UPDATE", "SET", "DELETE",
@@ -79,9 +44,34 @@ public class SqlKeywordsService
         BuildRegex();
     }
 
+    /// <summary>
+    /// Loads keywords and snippets directly from SQLite database for the specified dialect.
+    /// Supports: MSSQL, PostgreSQL, MySQL, SQLite, etc.
+    /// </summary>
+    public async Task LoadKeywordsFromDatabaseAsync(string dialect = "MSSQL")
+    {
+        try
+        {
+            CurrentDialect = dialect;
+            var dbKeywords = await DatabaseStorageService.Instance.GetKeywordsAsync(dialect);
+            var dbSnippets = await DatabaseStorageService.Instance.GetSnippetsAsync(dialect);
+
+            if (dbKeywords.Count > 0)
+            {
+                Keywords = dbKeywords;
+                Snippets = dbSnippets;
+                BuildRegex();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SqlKeywordsService] Failed to load from SQLite: {ex.Message}");
+        }
+    }
+
     private void BuildRegex()
     {
-        // Sort by length descending to match composite keywords first (e.g. "PRIMARY KEY" before "PRIMARY")
+        // Sort by length descending to match composite keywords first (e.g. "CROSS APPLY" before "CROSS")
         var sorted = Keywords.OrderByDescending(k => k.Length).Select(Regex.Escape);
         string pattern = $@"\b({string.Join("|", sorted)})\b";
         KeywordRegex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);

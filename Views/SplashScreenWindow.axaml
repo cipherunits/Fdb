@@ -1,7 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Fdb.ViewModels"
-        xmlns:ui="using:FluentAvalonia.UI.Controls"
+        xmlns:components="using:Fdb.Components"
+        xmlns:views="using:Fdb.Views"
         x:Class="Fdb.Views.SplashScreenWindow"
         x:DataType="vm:SplashScreenViewModel"
         Title="Fdb Studio - Starting"
@@ -14,57 +15,6 @@
         Background="Transparent"
         TransparencyLevelHint="Transparent">
 
-    <!-- Frameless splash card. The artwork fills the window; progress sits on top of it. -->
-    <Border Margin="16"
-            CornerRadius="12"
-            ClipToBounds="True"
-            BoxShadow="0 16 40 0 #66000000">
-        <Grid>
-            <Image Source="avares://Fdb/Assets/Images/splash_screen.jpg"
-                   Stretch="UniformToFill"
-                   RenderOptions.BitmapInterpolationMode="HighQuality"/>
-
-            <Border VerticalAlignment="Bottom"
-                    Background="#B30B0F14"
-                    Padding="24,14,24,16">
-                <StackPanel Spacing="10">
-                    <Grid ColumnDefinitions="*, Auto">
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                            <ui:FASymbolIcon Symbol="Sync" FontSize="11" Foreground="#E2E8F0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding StatusText}"
-                                       FontSize="11"
-                                       Foreground="#E2E8F0"
-                                       FontWeight="Medium"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding ProgressValue, StringFormat='{}{0}%'}"
-                                   FontSize="11"
-                                   Foreground="#CBD5E1"
-                                   FontWeight="SemiBold"
-                                   VerticalAlignment="Center"/>
-                    </Grid>
-
-                    <ProgressBar Height="4"
-                                 CornerRadius="2"
-                                 Minimum="0" Maximum="100"
-                                 Value="{Binding ProgressValue}"
-                                 Foreground="#E8943A"
-                                 Background="#33FFFFFF"
-                                 HorizontalAlignment="Stretch"/>
-
-                    <Grid ColumnDefinitions="*, Auto" Margin="0,2,0,0">
-                        <TextBlock Grid.Column="0"
-                                   Text="Connecting to local database engine..."
-                                   FontSize="10"
-                                   Foreground="#94A3B8"/>
-                        <TextBlock Grid.Column="1"
-                                   Text="Click anywhere to skip"
-                                   FontSize="10"
-                                   Foreground="#94A3B8"/>
-                    </Grid>
-                </StackPanel>
-            </Border>
-        </Grid>
-    </Border>
+    <!-- Composed Splash Window Hosting SplashScreenCardComponent -->
+    <components:SplashScreenCardComponent />
 </Window>

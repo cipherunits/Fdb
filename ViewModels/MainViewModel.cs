@@ -27,6 +27,9 @@ public partial class MainViewModel : ViewModelBase
     private ExportDataModalViewModel _exportModal;
 
     [ObservableProperty]
+    private SettingsModalViewModel _settingsModal;
+
+    [ObservableProperty]
     private QueryResultTableViewModel _sampleQueryResult;
 
     [ObservableProperty]
@@ -41,8 +44,31 @@ public partial class MainViewModel : ViewModelBase
         _connectModal = new ConnectDatabaseModalViewModel();
         _confirmModal = new ConfirmActionModalViewModel();
         _exportModal = new ExportDataModalViewModel();
+        _settingsModal = new SettingsModalViewModel();
         _sampleQueryResult = new QueryResultTableViewModel();
         _sampleSchema = new SchemaPropertiesTableViewModel();
+
+        // Initialize SQLite local storage in background
+        _ = Fdb.Services.DatabaseStorageService.Instance.InitializeAsync();
+    }
+
+    [RelayCommand]
+    public async System.Threading.Tasks.Task ExecuteQuery()
+    {
+        string query = Editor.SelectedTab?.Text ?? "SELECT * FROM dbo.Users;";
+        await Fdb.Services.DatabaseStorageService.Instance.SaveQueryHistoryAsync(
+            query, "14 ms", SampleQueryResult.Rows.Count, "Success");
+        ShowFooter();
+    }
+
+    [RelayCommand]
+    public async System.Threading.Tasks.Task SaveQuery()
+    {
+        if (Editor.SelectedTab != null)
+        {
+            await Fdb.Services.DatabaseStorageService.Instance.SaveQueryHistoryAsync(
+                Editor.SelectedTab.Text, "0 ms", 0, "Saved");
+        }
     }
 
     [RelayCommand]
@@ -80,6 +106,12 @@ public partial class MainViewModel : ViewModelBase
         {
             ResetFooterTabs();
         }
+    }
+
+    [RelayCommand]
+    public void ToggleFooterMaximized()
+    {
+        Footer.ToggleMaximizeCommand.Execute(null);
     }
 
     [RelayCommand]
@@ -143,5 +175,14 @@ public partial class MainViewModel : ViewModelBase
         Footer.Tabs.Add("Output");
         Footer.Tabs.Add("Problems");
         Footer.SelectedTab = "Terminal";
+    }
+
+    [RelayCommand]
+    public void Exit()
+    {
+        if (Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
+        }
     }
 }

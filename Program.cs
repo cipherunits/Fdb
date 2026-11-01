@@ -10,6 +10,16 @@ sealed class Program
     [STAThread]
     public static async Task Main(string[] args)
     {
+        AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+        {
+            Console.WriteLine($"[UnhandledException]: {e.ExceptionObject}");
+        };
+        TaskScheduler.UnobservedTaskException += (s, e) =>
+        {
+            Console.WriteLine($"[UnobservedTaskException]: {e.Exception}");
+            e.SetObserved();
+        };
+
         if (args.Length > 0 && args[0] == "--verify")
         {
             Console.WriteLine("=== Fdb Dynamic Layout Verification ===");
@@ -49,6 +59,23 @@ sealed class Program
             vm.ShowFooterCommand.Execute(null);
             Console.WriteLine($"Sidebar: Visible={vm.Sidebar.IsVisible}, ColWidth={window.MainGrid.ColumnDefinitions[0].Width}");
             Console.WriteLine($"Footer: Visible={vm.Footer.IsVisible}, RowHeight={window.CenterGrid.RowDefinitions[2].Height}");
+
+            // 3b. Test Maximizing Footer (Fullscreen Excel Table)
+            Console.WriteLine("\n[Action] Toggling Fullscreen / Maximize on Footer (Excel Table)...");
+            vm.ToggleFooterMaximizedCommand.Execute(null);
+            Console.WriteLine($"Footer Maximize State: IsMaximized={vm.Footer.IsMaximized}, FooterRowHeight={window.CenterGrid.RowDefinitions[2].Height}, EditorRowHeight={window.CenterGrid.RowDefinitions[0].Height}");
+            if (!vm.Footer.IsMaximized || window.CenterGrid.RowDefinitions[2].Height.GridUnitType != Avalonia.Controls.GridUnitType.Star || window.CenterGrid.RowDefinitions[0].Height.Value != 0)
+            {
+                throw new Exception("Footer fullscreen failed! Footer did not take 1* or Editor row is not 0.");
+            }
+
+            Console.WriteLine("[Action] Restoring Footer from Fullscreen...");
+            vm.ToggleFooterMaximizedCommand.Execute(null);
+            Console.WriteLine($"Footer Restored: IsMaximized={vm.Footer.IsMaximized}, FooterRowHeight={window.CenterGrid.RowDefinitions[2].Height}, EditorRowHeight={window.CenterGrid.RowDefinitions[0].Height}");
+            if (vm.Footer.IsMaximized || window.CenterGrid.RowDefinitions[2].Height.GridUnitType != Avalonia.Controls.GridUnitType.Pixel || window.CenterGrid.RowDefinitions[0].Height.GridUnitType != Avalonia.Controls.GridUnitType.Star)
+            {
+                throw new Exception("Footer restore failed! Footer is not pixel height or Editor is not 1*.");
+            }
 
             // 4. Test Table Components Data
             Console.WriteLine("\n[Action] Verifying Table Components...");
@@ -104,7 +131,89 @@ sealed class Program
             Console.WriteLine($"ExportModal: IsOpen = {vm.ExportModal.IsOpen}, Format = {vm.ExportModal.SelectedFormat}");
             vm.ExportModal.CloseCommand.Execute(null);
             Console.WriteLine($"ExportModal: IsOpen = {vm.ExportModal.IsOpen} (Closed)");
-            Console.WriteLine($"ExportModal: IsOpen = {vm.ExportModal.IsOpen} (Closed)");
+
+            // Test Settings Modal (Appearance & Theme Switching)
+            Console.WriteLine("\n[Action] Verifying Settings Modal & Theme Switching...");
+            Console.WriteLine($"SettingsModal initially open: {vm.SettingsModal.IsOpen}");
+            await vm.SettingsModal.OpenAsync();
+            Console.WriteLine($"After OpenAsync: SettingsModal.IsOpen = {vm.SettingsModal.IsOpen}, SelectedTheme = {vm.SettingsModal.SelectedTheme}");
+            if (!vm.SettingsModal.IsOpen) throw new Exception("SettingsModal failed to open!");
+
+            // Test switching to Dark theme
+            Console.WriteLine("[Action] Switching to Dark theme...");
+            vm.SettingsModal.SelectTheme("Dark");
+            Console.WriteLine($"Theme applied: CurrentTheme={Fdb.Services.ThemeService.Instance.CurrentTheme}, IsDark={vm.SettingsModal.IsDarkTheme}");
+            if (!vm.SettingsModal.IsDarkTheme || Fdb.Services.ThemeService.Instance.CurrentTheme != "Dark")
+            {
+                throw new Exception("Dark theme selection failed!");
+            }
+            await vm.SettingsModal.SaveAsync();
+            Console.WriteLine($"After SaveAsync: SettingsModal.IsOpen = {vm.SettingsModal.IsOpen}");
+            string persistedTheme = await Fdb.Services.DatabaseStorageService.Instance.GetThemeAsync();
+            Console.WriteLine($"SQLite Persisted Theme: '{persistedTheme}'");
+            if (persistedTheme != "Dark") throw new Exception("Failed to persist Dark theme to SQLite!");
+
+            // Test switching to System theme
+            await vm.SettingsModal.OpenAsync();
+            vm.SettingsModal.SelectTheme("System");
+            if (!vm.SettingsModal.IsSystemTheme || Fdb.Services.ThemeService.Instance.CurrentTheme != "System")
+            {
+                throw new Exception("System theme selection failed!");
+            }
+            await vm.SettingsModal.SaveAsync();
+            string persistedSystemTheme = await Fdb.Services.DatabaseStorageService.Instance.GetThemeAsync();
+            Console.WriteLine($"SQLite Persisted System Theme: '{persistedSystemTheme}'");
+            if (persistedSystemTheme != "System") throw new Exception("Failed to persist System theme to SQLite!");
+
+            // Restore back to Light theme
+            await vm.SettingsModal.OpenAsync();
+            vm.SettingsModal.SelectTheme("Light");
+            await vm.SettingsModal.SaveAsync();
+            string restoredTheme = await Fdb.Services.DatabaseStorageService.Instance.GetThemeAsync();
+            Console.WriteLine($"Restored Theme in SQLite: '{restoredTheme}'");
+            if (restoredTheme != "Light") throw new Exception("Failed to restore Light theme in SQLite!");
+
+            // Test Keyword Color Customization & High Contrast Adaptation across Themes
+            Console.WriteLine("\n[Action] Verifying Keyword Syntax Color Customization & Contrast Adaptation...");
+            await vm.SettingsModal.OpenAsync();
+            Console.WriteLine($"Initial Keyword Color: '{vm.SettingsModal.SelectedKeywordColor}'");
+
+            // Select 'Green' (Emerald / Mint)
+            vm.SettingsModal.SelectKeywordColor("Green");
+            Console.WriteLine($"Selected Green Keyword Color: IsGreen={vm.SettingsModal.IsGreenKeyword}");
+            if (!vm.SettingsModal.IsGreenKeyword) throw new Exception("Green keyword selection failed in ViewModel!");
+
+            // In Light theme, Green should be emerald (#059669)
+            var lightBrush = Fdb.Services.ThemeService.Instance.CurrentKeywordBrush as Avalonia.Media.ISolidColorBrush;
+            Console.WriteLine($"Light Theme Green Keyword Brush: {lightBrush?.Color}");
+            if (lightBrush?.Color != Avalonia.Media.Color.Parse("#059669"))
+            {
+                throw new Exception($"Expected Light Theme Green Color #059669, got {lightBrush?.Color}");
+            }
+
+            // Switch to Dark Theme: Green keyword should automatically adapt to bright mint (#34D399) for high contrast!
+            vm.SettingsModal.SelectTheme("Dark");
+            var darkBrush = Fdb.Services.ThemeService.Instance.CurrentKeywordBrush as Avalonia.Media.ISolidColorBrush;
+            Console.WriteLine($"Dark Theme Green Keyword Brush (Auto Contrast): {darkBrush?.Color}");
+            if (darkBrush?.Color != Avalonia.Media.Color.Parse("#34D399"))
+            {
+                throw new Exception($"Expected Dark Theme Mint Color #34D399, got {darkBrush?.Color}");
+            }
+
+            // Save Green Keyword Color & Dark Theme to SQLite
+            await vm.SettingsModal.SaveAsync();
+            string persistedKeywordColor = await Fdb.Services.DatabaseStorageService.Instance.GetKeywordColorAsync();
+            Console.WriteLine($"SQLite Persisted Keyword Color: '{persistedKeywordColor}'");
+            if (persistedKeywordColor != "Green") throw new Exception("Failed to persist Green Keyword Color to SQLite!");
+
+            // Revert back to Blue Keyword Color and Light Theme
+            await vm.SettingsModal.OpenAsync();
+            vm.SettingsModal.SelectKeywordColor("Blue");
+            vm.SettingsModal.SelectTheme("Light");
+            await vm.SettingsModal.SaveAsync();
+            string restoredKeywordColor = await Fdb.Services.DatabaseStorageService.Instance.GetKeywordColorAsync();
+            Console.WriteLine($"Restored Keyword Color in SQLite: '{restoredKeywordColor}'");
+            if (restoredKeywordColor != "Blue") throw new Exception("Failed to restore Blue Keyword Color to SQLite!");
 
             // 6. Test Editor Tab Switching & Active State
             Console.WriteLine("\n[Action] Verifying Editor Tab Switching & State...");
@@ -170,21 +279,133 @@ sealed class Program
 
             // Test typing in editor
             Console.WriteLine("\n[Action] Testing typing 'se' in TextEditor...");
+            // Test typing in editor & Zoom shortcuts
+            Console.WriteLine("\n[Action] Testing typing 'se' in TextEditor & Zoom Shortcuts...");
             var editorForTest = new Fdb.Components.EditorComponent { DataContext = vm.Editor };
-            var te = editorForTest.FindControl<AvaloniaEdit.TextEditor>("CodeEditor");
+            var te = editorForTest.FindControl<AvaloniaEdit.TextEditor>("CodeEditor")!;
             te.Document.Text = "";
             te.CaretOffset = 0;
             te.Document.Insert(0, "s");
             te.CaretOffset = 1;
+            string word1 = editorForTest.GetWordBeforeOffset(1);
+            Console.WriteLine($"Word after typing 's': '{word1}'");
+            if (word1 != "s") throw new Exception("Failed to extract single-character word prefix!");
+
             te.Document.Insert(1, "e");
             te.CaretOffset = 2;
-            Console.WriteLine($"Editor text after typing 'se': '{te.Document.Text}'");
-            
-            // Test CompletionWindow creation
-            Console.WriteLine("\n[Action] Testing CompletionWindow instantiation...");
-            var compWin = new AvaloniaEdit.CodeCompletion.CompletionWindow(te.TextArea);
-            compWin.Close();
-            Console.WriteLine("CompletionWindow created and closed successfully.");
+            string word2 = editorForTest.GetWordBeforeOffset(2);
+            Console.WriteLine($"Word after typing 'se': '{word2}'");
+            if (word2 != "se") throw new Exception("Failed to extract 'se' word prefix!");
+
+            // Test Zoom In / Out / Reset
+            Console.WriteLine($"Initial Editor FontSize: {te.FontSize}");
+            if (te.FontSize != 13) throw new Exception("Default font size should be 13!");
+
+            editorForTest.ZoomIn();
+            Console.WriteLine($"After ZoomIn (Ctrl++): FontSize={te.FontSize}");
+            if (te.FontSize != 14) throw new Exception("ZoomIn failed to increase font size!");
+
+            editorForTest.ZoomOut();
+            editorForTest.ZoomOut();
+            Console.WriteLine($"After ZoomOut twice (Ctrl+-): FontSize={te.FontSize}");
+            if (te.FontSize != 12) throw new Exception("ZoomOut failed to decrease font size!");
+
+            editorForTest.ResetZoom();
+            Console.WriteLine($"After ResetZoom (Ctrl+0): FontSize={te.FontSize}");
+            if (te.FontSize != 13) throw new Exception("ResetZoom failed to restore font size to 13!");
+
+            // Test CompletionData creation and replacement
+            Console.WriteLine("\n[Action] Testing CompletionData instantiation and insertion...");
+            var kwData = new Fdb.Services.SqlCompletionData("SELECT", "SQL Keyword: SELECT", 10.0, false);
+            var snipData = new Fdb.Services.SqlCompletionData("SELECT * FROM", "Select all columns", 8.0, true, "SELECT * FROM ");
+            Console.WriteLine($"kwData: Text={kwData.Text}, IsSnippet={kwData.IsSnippet}, Category={kwData.Category}");
+            Console.WriteLine($"snipData: Text={snipData.Text}, IsSnippet={snipData.IsSnippet}, InsertionText='{snipData.InsertionText}'");
+
+            // Execute completion on editor
+            kwData.Complete(te.TextArea, new AvaloniaEdit.Document.TextSegment { StartOffset = 0, Length = 2 }, EventArgs.Empty);
+            Console.WriteLine($"Editor text after completing 'SELECT': '{te.Document.Text}'");
+            if (te.Document.Text != "SELECT") throw new Exception("CompletionData failed to insert 'SELECT'!");
+
+            // Test In-Place IntelliSense Overlay Component
+            Console.WriteLine("\n[Action] Verifying Modular SqlIntelliSenseOverlayComponent on EditorComponent...");
+            te.Document.Text = "";
+            te.CaretOffset = 0;
+            te.Document.Insert(0, "S");
+            te.CaretOffset = 1;
+
+            editorForTest.UpdateAndShowCompletion("S", showAll: false);
+            var overlay = editorForTest.FindControl<Fdb.Components.SqlIntelliSenseOverlayComponent>("IntelliSenseOverlay")!;
+            Console.WriteLine($"After typing 'S': Overlay.IsVisible = {overlay.IsVisible}, ItemCount = {overlay.ItemCount}");
+            if (!overlay.IsVisible || overlay.ItemCount == 0)
+            {
+                throw new Exception("SqlIntelliSenseOverlayComponent should be visible with items after typing 'S'!");
+            }
+
+            var topItem = overlay.SelectedItem;
+            Console.WriteLine($"Top selected item for 'S': Text='{topItem?.Text}', Category='{topItem?.Category}'");
+            if (topItem?.Text != "SELECT")
+            {
+                throw new Exception($"Expected top selected item to be 'SELECT', but got '{topItem?.Text}'");
+            }
+
+            // Test typing 'E' ('SE')
+            te.Document.Insert(1, "E");
+            te.CaretOffset = 2;
+            editorForTest.UpdateAndShowCompletion("SE", showAll: false);
+            var seTopItem = overlay.SelectedItem;
+            Console.WriteLine($"After typing 'SE': Overlay.IsVisible = {overlay.IsVisible}, TopItem='{seTopItem?.Text}'");
+            if (seTopItem?.Text != "SELECT")
+            {
+                throw new Exception($"Expected top selected item for 'SE' to be 'SELECT', but got '{seTopItem?.Text}'");
+            }
+
+            // Test Commit (Tab / Enter)
+            editorForTest.CommitSelectedCompletion();
+            Console.WriteLine($"After Commit: Document.Text='{te.Document.Text}', Overlay.IsVisible={overlay.IsVisible}");
+            if (te.Document.Text != "SELECT " || overlay.IsVisible)
+            {
+                throw new Exception($"Commit failed! Expected 'SELECT ' and overlay hidden, got '{te.Document.Text}' and IsVisible={overlay.IsVisible}");
+            }
+
+            // Test MainEditor in Window
+            Console.WriteLine("\n[Action] Verifying MainEditor in Window visual tree...");
+            var mainEditor = window.FindControl<Fdb.Components.EditorComponent>("MainEditor");
+            Console.WriteLine($"MainEditor found in window: {mainEditor != null}");
+            var mainCodeEditor = mainEditor?.FindControl<AvaloniaEdit.TextEditor>("CodeEditor");
+            Console.WriteLine($"MainCodeEditor found: {mainCodeEditor != null}");
+
+            if (mainEditor != null && mainCodeEditor != null)
+            {
+                mainCodeEditor.Document = new AvaloniaEdit.Document.TextDocument();
+                mainCodeEditor.Document.Text = "";
+                mainCodeEditor.CaretOffset = 0;
+
+                // Simulate typing 's'
+                var textArgs = new Avalonia.Input.TextInputEventArgs
+                {
+                    Text = "s",
+                    RoutedEvent = Avalonia.Input.InputElement.TextInputEvent
+                };
+                mainCodeEditor.TextArea.RaiseEvent(textArgs);
+
+                var winOverlay = mainEditor.FindControl<Fdb.Components.SqlIntelliSenseOverlayComponent>("IntelliSenseOverlay")!;
+                Console.WriteLine($"Window MainEditor after typing 's': Overlay.IsVisible={winOverlay.IsVisible}, ItemCount={winOverlay.ItemCount}");
+                var winTopItem = winOverlay.SelectedItem;
+                Console.WriteLine($"Window MainEditor TopItem: '{winTopItem?.Text}'");
+
+                if (!winOverlay.IsVisible || winTopItem?.Text != "SELECT")
+                {
+                    throw new Exception("Window MainEditor failed to suggest 'SELECT' on typing 's'!");
+                }
+
+                // Simulate Enter commit
+                mainEditor.CommitSelectedCompletion();
+                Console.WriteLine($"Window MainEditor after commit: Document.Text='{mainCodeEditor.Document.Text}'");
+                if (mainCodeEditor.Document.Text != "SELECT ")
+                {
+                    throw new Exception("Window MainEditor failed to commit 'SELECT '!");
+                }
+            }
 
             // 8. Test Zero Emojis / All Vector Icons
             Console.WriteLine("\n[Action] Verifying Zero Emojis / Native Vector Icons...");
@@ -202,11 +423,11 @@ sealed class Program
                 throw new Exception("Emojis found in AXAML files!");
             }
 
-            // 9. Test Splash Screen Lifecycle
-            Console.WriteLine("\n[Action] Verifying Splash Screen Window...");
+            // 9. Test Splash Screen Lifecycle & SQLite Startup Execution
+            Console.WriteLine("\n[Action] Verifying Splash Screen Window & SQL Startup Execution...");
             var splashWindow = new Fdb.Views.SplashScreenWindow();
             Console.WriteLine($"Splash initial status: '{splashWindow.ViewModel.StatusText}', Progress: {splashWindow.ViewModel.ProgressValue}%");
-            await splashWindow.RunStartupSequenceAsync(40).ConfigureAwait(false);
+            await splashWindow.RunStartupSequenceAsync().ConfigureAwait(false);
             Console.WriteLine($"Splash completed status: '{splashWindow.ViewModel.StatusText}', Progress: {splashWindow.ViewModel.ProgressValue}%");
             if (splashWindow.ViewModel.ProgressValue != 100)
             {
@@ -214,7 +435,82 @@ sealed class Program
             }
             splashWindow.Dismiss();
 
-            Console.WriteLine("\n>>> ALL TESTS (LAYOUT, TABLES, MODALS, TABS, SQL AUTOCOMPLETE, VECTOR ICONS & SPLASH SCREEN) PASSED! <<<");
+            // 10. Test SQLite Local Storage Service & Dialect Keywords
+            Console.WriteLine("\n[Action] Verifying SQLite Local Storage Service & Multi-Dialect Keywords...");
+            var storageService = Fdb.Services.DatabaseStorageService.Instance;
+            await storageService.InitializeAsync();
+
+            var dialects = await storageService.GetSupportedDialectsAsync();
+            Console.WriteLine($"SQLite Supported Dialects: {string.Join(", ", dialects)}");
+            if (!dialects.Contains("MSSQL") || !dialects.Contains("PostgreSQL") || !dialects.Contains("MySQL") || !dialects.Contains("SQLite"))
+            {
+                throw new Exception("Supported dialects missing expected database engines in SQLite!");
+            }
+
+            var mssqlKeywords = await storageService.GetKeywordsAsync("MSSQL");
+            var pgKeywords = await storageService.GetKeywordsAsync("PostgreSQL");
+            var mysqlKeywords = await storageService.GetKeywordsAsync("MySQL");
+            var sqliteKeywords = await storageService.GetKeywordsAsync("SQLite");
+            Console.WriteLine($"Keywords count: MSSQL={mssqlKeywords.Count}, PostgreSQL={pgKeywords.Count}, MySQL={mysqlKeywords.Count}, SQLite={sqliteKeywords.Count}");
+
+            if (!mssqlKeywords.Contains("TOP") || !mssqlKeywords.Contains("IDENTITY"))
+            {
+                throw new Exception("MSSQL keywords missing expected dialect keywords!");
+            }
+            if (!pgKeywords.Contains("RETURNING") || !pgKeywords.Contains("SERIAL"))
+            {
+                throw new Exception("PostgreSQL keywords missing expected dialect keywords!");
+            }
+            if (!mysqlKeywords.Contains("AUTO_INCREMENT"))
+            {
+                throw new Exception("MySQL keywords missing AUTO_INCREMENT!");
+            }
+            if (!sqliteKeywords.Contains("AUTOINCREMENT"))
+            {
+                throw new Exception("SQLite keywords missing AUTOINCREMENT!");
+            }
+
+            var mssqlSnippets = await storageService.GetSnippetsAsync("MSSQL");
+            var pgSnippets = await storageService.GetSnippetsAsync("PostgreSQL");
+            Console.WriteLine($"Snippets count: MSSQL={mssqlSnippets.Count}, PostgreSQL={pgSnippets.Count}");
+            if (mssqlSnippets.Count == 0 || pgSnippets.Count == 0)
+            {
+                throw new Exception("Dialect snippets failed to load from SQLite!");
+            }
+
+            // Test Dynamic Dialect Switching in SqlKeywordsService
+            Console.WriteLine("\n[Action] Testing Dynamic Dialect Switching in SqlKeywordsService...");
+            await Fdb.Services.SqlKeywordsService.Instance.LoadKeywordsFromDatabaseAsync("PostgreSQL");
+            if (Fdb.Services.SqlKeywordsService.Instance.CurrentDialect != "PostgreSQL" || !Fdb.Services.SqlKeywordsService.Instance.Keywords.Contains("RETURNING"))
+            {
+                throw new Exception("SqlKeywordsService failed to switch to PostgreSQL dialect!");
+            }
+            Console.WriteLine($"Switched to PostgreSQL. Contains 'RETURNING': {Fdb.Services.SqlKeywordsService.Instance.Keywords.Contains("RETURNING")}");
+
+            await Fdb.Services.SqlKeywordsService.Instance.LoadKeywordsFromDatabaseAsync("MSSQL");
+            if (Fdb.Services.SqlKeywordsService.Instance.CurrentDialect != "MSSQL" || !Fdb.Services.SqlKeywordsService.Instance.Keywords.Contains("TOP"))
+            {
+                throw new Exception("SqlKeywordsService failed to switch back to MSSQL dialect!");
+            }
+            Console.WriteLine($"Switched back to MSSQL. Contains 'TOP': {Fdb.Services.SqlKeywordsService.Instance.Keywords.Contains("TOP")}");
+
+            var connections = await storageService.GetRecentConnectionsAsync();
+            Console.WriteLine($"SQLite Connections loaded: {connections.Count} connection(s).");
+            var history = await storageService.GetQueryHistoryAsync();
+            Console.WriteLine($"SQLite QueryHistory loaded: {history.Count} record(s).");
+            var cachedRows = await storageService.GetQueryResultsAsync();
+            Console.WriteLine($"SQLite QueryResults loaded: {cachedRows.Count} row(s).");
+
+            // Test saving new query to SQLite
+            await storageService.SaveQueryHistoryAsync("SELECT id, name FROM Users WHERE status = 'Active';", "6 ms", 1, "Success");
+            var updatedHistory = await storageService.GetQueryHistoryAsync();
+            Console.WriteLine($"SQLite QueryHistory updated count: {updatedHistory.Count} record(s).");
+            if (updatedHistory.Count == 0)
+            {
+                throw new Exception("Failed to persist query history in SQLite!");
+            }
+
+            Console.WriteLine("\n>>> ALL TESTS (LAYOUT, TABLES, MODALS, TABS, SQL AUTOCOMPLETE, MULTI-DIALECT SQLITE, VECTOR ICONS, SPLASH SCREEN & STORAGE) PASSED! <<<");
             return;
         }
 

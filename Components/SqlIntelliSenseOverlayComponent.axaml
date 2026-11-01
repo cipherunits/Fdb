@@ -1,0 +1,111 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:services="using:Fdb.Services"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             mc:Ignorable="d" d:DesignWidth="360" d:DesignHeight="280"
+             x:Class="Fdb.Components.SqlIntelliSenseOverlayComponent">
+
+    <!-- Reusable SQL IntelliSense Floating Card -->
+    <Border Name="CardContainer"
+            Width="340"
+            MaxHeight="280"
+            Background="{DynamicResource AppSurfaceBrush}"
+            BorderBrush="{DynamicResource AppKeywordBrush}"
+            BorderThickness="1.5"
+            CornerRadius="6"
+            BoxShadow="0 6 24 #30000000"
+            Padding="1">
+        <Grid RowDefinitions="Auto, *, Auto">
+            
+            <!-- 1. Suggestions Header -->
+            <Border Grid.Row="0" 
+                    Background="{DynamicResource AppIntelliSenseHeaderBackgroundBrush}" 
+                    BorderBrush="{DynamicResource AppBorderBrush}" 
+                    BorderThickness="0,0,0,1" 
+                    Padding="8,5" 
+                    CornerRadius="5,5,0,0">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <ui:FASymbolIcon Symbol="Filter" FontSize="11" Foreground="{DynamicResource AppKeywordBrush}"/>
+                        <TextBlock Text="SQL IntelliSense" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" 
+                               Text="Tab or ↵ to insert" 
+                               FontSize="10" 
+                               Foreground="{DynamicResource AppTextMutedBrush}" 
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <!-- 2. Suggestions Items List -->
+            <ListBox Grid.Row="1" 
+                     Name="ItemsListBox"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     MaxHeight="200"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="services:SqlCompletionData">
+                        <Border Padding="4,2" CornerRadius="4">
+                            <Grid ColumnDefinitions="Auto, *, Auto">
+                                <!-- Vector Icon: Tag (Keyword) or Code (Snippet) -->
+                                <Panel Grid.Column="0" Width="18" Height="18" Margin="0,0,6,0">
+                                    <ui:FASymbolIcon Symbol="Tag" 
+                                                     FontSize="11" 
+                                                     Foreground="{DynamicResource AppKeywordBrush}" 
+                                                     IsVisible="{Binding !IsSnippet}"
+                                                     VerticalAlignment="Center" 
+                                                     HorizontalAlignment="Center"/>
+                                    <ui:FASymbolIcon Symbol="Code" 
+                                                     FontSize="11" 
+                                                     Foreground="#D97706" 
+                                                     IsVisible="{Binding IsSnippet}"
+                                                     VerticalAlignment="Center" 
+                                                     HorizontalAlignment="Center"/>
+                                </Panel>
+
+                                <!-- Keyword / Snippet Name -->
+                                <TextBlock Grid.Column="1" 
+                                           Text="{Binding Text}" 
+                                           FontFamily="Cascadia Code, Consolas, Courier New, monospace"
+                                           FontSize="12" 
+                                           FontWeight="SemiBold" 
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                           VerticalAlignment="Center"/>
+
+                                <!-- Category Badge Pill -->
+                                <Border Grid.Column="2" 
+                                        Background="{DynamicResource AppIntelliSenseBadgeBackgroundBrush}" 
+                                        CornerRadius="3" 
+                                        Padding="5,1" 
+                                        VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Category}" 
+                                               FontSize="9" 
+                                               FontWeight="Medium" 
+                                               Foreground="{DynamicResource AppIntelliSenseBadgeForegroundBrush}"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- 3. Bottom Description / Preview Strip -->
+            <Border Grid.Row="2" 
+                    Name="DescriptionBorder"
+                    Background="{DynamicResource AppIntelliSenseHeaderBackgroundBrush}" 
+                    BorderBrush="{DynamicResource AppBorderBrush}" 
+                    BorderThickness="0,1,0,0" 
+                    Padding="8,4" 
+                    CornerRadius="0,0,5,5"
+                    IsVisible="False">
+                <TextBlock Name="DescriptionText" 
+                           FontSize="10" 
+                           Foreground="{DynamicResource AppTextSecondaryBrush}" 
+                           TextTrimming="CharacterEllipsis"/>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

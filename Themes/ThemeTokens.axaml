@@ -1,0 +1,24 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ================================================================= -->
+    <!-- Fdb Studio Design System: Shared Theme Tokens & Dimensions        -->
+    <!-- Componentized design metrics shared across all color themes       -->
+    <!-- ================================================================= -->
+
+    <!-- Corner Radii -->
+    <CornerRadius x:Key="AppCornerRadiusSmall">4</CornerRadius>
+    <CornerRadius x:Key="AppCornerRadiusMedium">6</CornerRadius>
+    <CornerRadius x:Key="AppCornerRadiusLarge">8</CornerRadius>
+    <CornerRadius x:Key="AppCornerRadiusRound">9999</CornerRadius>
+
+    <!-- Standard Font Families -->
+    <FontFamily x:Key="AppFontFamilyDefault">Segoe UI, Inter, -apple-system, BlinkMacSystemFont, Roboto, sans-serif</FontFamily>
+    <FontFamily x:Key="AppFontFamilyMonospace">Cascadia Code, Consolas, SF Mono, Courier New, monospace</FontFamily>
+
+    <!-- Standard Table Metrics -->
+    <x:Double x:Key="AppTableRowHeight">25</x:Double>
+    <x:Double x:Key="AppTableHeaderHeight">25</x:Double>
+    <x:Double x:Key="AppTableGutterWidth">56</x:Double>
+
+</ResourceDictionary>

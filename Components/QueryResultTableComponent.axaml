@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Fdb.ViewModels"
+             xmlns:components="using:Fdb.Components"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="400"
              x:Class="Fdb.Components.QueryResultTableComponent"
@@ -11,122 +12,122 @@
     <UserControl.Styles>
         <!-- Distinct Row Header / Index Column Cell Style with Prominent Divider Line -->
         <Style Selector="DataGridCell.row-header-col">
-            <Setter Property="Background" Value="#F1F5F9"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableGutterBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableGutterForegroundBrush}"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTableGutterBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,2,1"/>
         </Style>
 
         <!-- Alternating Column Cell Colors: Pure White vs Soft Dimmer Off-White (Compact Height) -->
         <Style Selector="DataGridCell.white-col">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableWhiteColBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableCellForegroundBrush}"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Padding" Value="8,2"/>
-            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTableCellBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
         </Style>
         <Style Selector="DataGridCell.alt-col">
-            <Setter Property="Background" Value="#F8FAFC"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableAltColBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableCellForegroundBrush}"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Padding" Value="8,2"/>
-            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTableCellBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
         </Style>
 
         <!-- Row Pointer Over (Hover) -->
         <Style Selector="DataGridRow:pointerover DataGridCell.row-header-col">
-            <Setter Property="Background" Value="#E2E8F0"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableHoverBackgroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:pointerover DataGridCell.white-col">
-            <Setter Property="Background" Value="#F1F5F9"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableHoverBackgroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:pointerover DataGridCell.alt-col">
-            <Setter Property="Background" Value="#E2E8F0"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableHoverBackgroundBrush}"/>
         </Style>
 
         <!-- Keep the grid's row selection invisible; cells are highlighted individually. -->
         <Style Selector="DataGridRow:selected DataGridCell.row-header-col">
-            <Setter Property="Background" Value="#F1F5F9"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableGutterBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableGutterForegroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:selected DataGridCell.white-col">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableWhiteColBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableCellForegroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:selected DataGridCell.alt-col">
-            <Setter Property="Background" Value="#F8FAFC"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableAltColBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableCellForegroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:selected:pointerover DataGridCell.row-header-col">
-            <Setter Property="Background" Value="#E2E8F0"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableHoverBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableGutterForegroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:selected:pointerover DataGridCell.white-col">
-            <Setter Property="Background" Value="#F1F5F9"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableHoverBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableCellForegroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:selected:pointerover DataGridCell.alt-col">
-            <Setter Property="Background" Value="#E2E8F0"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableHoverBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableCellForegroundBrush}"/>
         </Style>
 
         <!-- Excel-style cell selection -->
         <Style Selector="DataGridCell.excel-selected">
-            <Setter Property="Background" Value="#DBEAFE"/>
-            <Setter Property="Foreground" Value="#1E3A8A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableSelectedBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableSelectedForegroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:pointerover DataGridCell.excel-selected">
-            <Setter Property="Background" Value="#BFDBFE"/>
-            <Setter Property="Foreground" Value="#1E3A8A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableSelectedBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableSelectedForegroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:selected DataGridCell.excel-selected">
-            <Setter Property="Background" Value="#DBEAFE"/>
-            <Setter Property="Foreground" Value="#1E3A8A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableSelectedBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableSelectedForegroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:selected:pointerover DataGridCell.excel-selected">
-            <Setter Property="Background" Value="#BFDBFE"/>
-            <Setter Property="Foreground" Value="#1E3A8A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableSelectedBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableSelectedForegroundBrush}"/>
         </Style>
 
         <Style Selector="DataGridCell.excel-active">
-            <Setter Property="Background" Value="#EFF6FF"/>
-            <Setter Property="Foreground" Value="#1E3A8A"/>
-            <Setter Property="BorderBrush" Value="#1D4ED8"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableActiveBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableActiveForegroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTableActiveBorderBrush}"/>
             <Setter Property="BorderThickness" Value="2"/>
         </Style>
         <Style Selector="DataGridRow:pointerover DataGridCell.excel-active">
-            <Setter Property="Background" Value="#DBEAFE"/>
-            <Setter Property="Foreground" Value="#1E3A8A"/>
-            <Setter Property="BorderBrush" Value="#1D4ED8"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableActiveBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableActiveForegroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTableActiveBorderBrush}"/>
             <Setter Property="BorderThickness" Value="2"/>
         </Style>
         <Style Selector="DataGridRow:selected DataGridCell.excel-active">
-            <Setter Property="Background" Value="#EFF6FF"/>
-            <Setter Property="Foreground" Value="#1E3A8A"/>
-            <Setter Property="BorderBrush" Value="#1D4ED8"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableActiveBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableActiveForegroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTableActiveBorderBrush}"/>
             <Setter Property="BorderThickness" Value="2"/>
         </Style>
         <Style Selector="DataGridRow:selected:pointerover DataGridCell.excel-active">
-            <Setter Property="Background" Value="#DBEAFE"/>
-            <Setter Property="Foreground" Value="#1E3A8A"/>
-            <Setter Property="BorderBrush" Value="#1D4ED8"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableActiveBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableActiveForegroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTableActiveBorderBrush}"/>
             <Setter Property="BorderThickness" Value="2"/>
         </Style>
 
         <!-- Modern Column Header Styling with Prominent Titles (Compact Height) -->
         <Style Selector="DataGridColumnHeader">
-            <Setter Property="Background" Value="#F1F5F9"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableHeaderBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableHeaderForegroundBrush}"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Height" Value="25"/>
             <Setter Property="Padding" Value="8,2"/>
-            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTableHeaderBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
         </Style>
     </UserControl.Styles>
@@ -135,76 +136,8 @@
     <Border Background="{DynamicResource AppWorkspaceBrush}">
         <Grid RowDefinitions="Auto, *, Auto">
             
-            <!-- 1. Table Toolbar (Compact Height) -->
-            <Border Grid.Row="0" 
-                    Background="{DynamicResource AppSurfaceBrush}" 
-                    BorderBrush="{DynamicResource AppBorderBrush}" 
-                    BorderThickness="0,0,0,1" 
-                    Padding="6,2">
-                <Grid ColumnDefinitions="Auto, *, Auto">
-                    <!-- Left: Search Filter -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                        <TextBox Width="180" 
-                                 Height="23" 
-                                 FontSize="11" 
-                                 Padding="6,2" 
-                                 CornerRadius="4" 
-                                 PlaceholderText="Filter table rows..." 
-                                 Text="{Binding SearchFilter}"/>
-                        <Button Classes="classic-tool-btn" Command="{Binding RefreshCommand}" Height="23" Padding="6,2">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <ui:FASymbolIcon Symbol="Refresh" FontSize="11" VerticalAlignment="Center"/>
-                                <TextBlock Text="Refresh" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-
-                    <!-- Right: Execution Stats & Export -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <!-- Execution Time Badge -->
-                        <Border Background="{DynamicResource AppWorkspaceBrush}" 
-                                BorderBrush="{DynamicResource AppBorderBrush}" 
-                                BorderThickness="1" 
-                                CornerRadius="4" 
-                                Height="23"
-                                Padding="8,1">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <ui:FASymbolIcon Symbol="Clock" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding ExecutionTime}" 
-                                           Foreground="{DynamicResource AppTextSecondaryBrush}" 
-                                           FontSize="11" 
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Row Count Badge -->
-                        <Border Background="{DynamicResource AppWorkspaceBrush}" 
-                                BorderBrush="{DynamicResource AppBorderBrush}" 
-                                BorderThickness="1" 
-                                CornerRadius="4" 
-                                Height="23"
-                                Padding="8,1">
-                            <TextBlock Text="{Binding TotalRows, StringFormat='{}{0} rows'}" 
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}" 
-                                       FontSize="11" 
-                                       FontWeight="Medium"
-                                       VerticalAlignment="Center"/>
-                        </Border>
-
-                        <Button Classes="classic-tool-btn" 
-                                Height="23" 
-                                Padding="6,2"
-                                Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).ExportModal.OpenCommand}"
-                                ToolTip.Tip="Export table rows (CSV, JSON, SQL, TSV)">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <ui:FASymbolIcon Symbol="Download" FontSize="11" VerticalAlignment="Center"/>
-                                <TextBlock Text="Export..." VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
+            <!-- 1. Table Toolbar Component -->
+            <components:TableToolbarComponent Grid.Row="0" DataContext="{Binding}" />
             <!-- 2. Interactive DataGrid with Alternating Columns & Prominent Titles (RowHeight=25) -->
             <DataGrid x:Name="ResultsDataGrid"
                       Grid.Row="1" 
@@ -215,8 +148,8 @@
                       SelectionMode="Single"
                       ClipboardCopyMode="None"
                       GridLinesVisibility="All" 
-                      HorizontalGridLinesBrush="#CBD5E1"
-                      VerticalGridLinesBrush="#E2E8F0"
+                      HorizontalGridLinesBrush="{DynamicResource AppTableGridLinesHorizontalBrush}"
+                      VerticalGridLinesBrush="{DynamicResource AppTableGridLinesVerticalBrush}"
                       CanUserResizeColumns="True" 
                       CanUserSortColumns="True"
                       HeadersVisibility="Column"
@@ -259,7 +192,7 @@
                                 <Grid ColumnDefinitions="*, Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                     <TextBlock Grid.Column="0" 
                                                Text="{Binding RowIndex}" 
-                                               Foreground="#0F172A" 
+                                               Foreground="{DynamicResource AppTableGutterForegroundBrush}" 
                                                FontSize="11" 
                                                FontWeight="Bold" 
                                                HorizontalAlignment="Center" 
@@ -267,7 +200,7 @@
                                     <!-- Clear vertical divider line right in front of the row number -->
                                     <Border Grid.Column="1" 
                                             Width="2" 
-                                            Background="#94A3B8" 
+                                            Background="{DynamicResource AppTableDividerBrush}" 
                                             HorizontalAlignment="Right" 
                                             VerticalAlignment="Stretch"/>
                                 </Grid>
@@ -314,30 +247,8 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <!-- 3. Table Pagination / Status Bar (Compact Height) -->
-            <Border Grid.Row="2" 
-                    Background="{DynamicResource AppSurfaceBrush}" 
-                    BorderBrush="{DynamicResource AppBorderBrush}" 
-                    BorderThickness="0,1,0,0" 
-                    Height="22" 
-                    Padding="8,0">
-                <Grid ColumnDefinitions="Auto, *, Auto">
-                    <TextBlock Grid.Column="0" 
-                               Text="{Binding SelectionStatus}" 
-                               Foreground="{DynamicResource AppTextMutedBrush}" 
-                               FontSize="11" 
-                               VerticalAlignment="Center"/>
-
-                    <!-- Pagination Navigation -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                        <Button Classes="classic-menu-btn" Content="«" Padding="6,1" FontSize="11" MinHeight="18" />
-                        <Button Classes="classic-menu-btn" Content="‹" Padding="6,1" FontSize="11" MinHeight="18" />
-                        <TextBlock Text="Page 1 of 1" Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" Margin="4,0"/>
-                        <Button Classes="classic-menu-btn" Content="›" Padding="6,1" FontSize="11" MinHeight="18" />
-                        <Button Classes="classic-menu-btn" Content="»" Padding="6,1" FontSize="11" MinHeight="18" />
-                    </StackPanel>
-                </Grid>
-            </Border>
+            <!-- 3. Table Pagination Component -->
+            <components:TablePaginationComponent Grid.Row="2" DataContext="{Binding}" />
         </Grid>
     </Border>
 </UserControl>

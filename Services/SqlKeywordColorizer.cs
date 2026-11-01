@@ -7,27 +7,41 @@ namespace Fdb.Services;
 
 public class SqlKeywordColorizer : DocumentColorizingTransformer
 {
-    // Modern royal blue accent for SQL keywords
-    private static readonly IBrush KeywordBlueBrush = new SolidColorBrush(Color.Parse("#2563EB"));
-
     protected override void ColorizeLine(DocumentLine line)
     {
-        var regex = SqlKeywordsService.Instance.KeywordRegex;
-        if (regex == null) return;
-
-        int lineStartOffset = line.Offset;
-        string text = CurrentContext.Document.GetText(line);
-
-        var matches = regex.Matches(text);
-        foreach (Match match in matches)
+        try
         {
-            int start = lineStartOffset + match.Index;
-            int end = start + match.Length;
+            if (line == null || CurrentContext?.Document == null) return;
 
-            ChangeLinePart(start, end, element =>
+            var regex = SqlKeywordsService.Instance.KeywordRegex;
+            if (regex == null) return;
+
+            int lineStartOffset = line.Offset;
+            int lineEndOffset = line.EndOffset;
+            string text = CurrentContext.Document.GetText(line);
+
+            // Dynamically query active keyword color brush based on user settings and light/dark theme
+            var keywordBrush = ThemeService.Instance.CurrentKeywordBrush;
+
+            var matches = regex.Matches(text);
+            foreach (Match match in matches)
             {
-                element.TextRunProperties.SetForegroundBrush(KeywordBlueBrush);
-            });
+                int start = lineStartOffset + match.Index;
+                int end = start + match.Length;
+
+                // Ensure bounds are strictly within the line to prevent AvaloniaEdit out-of-range exceptions
+                if (start >= lineStartOffset && end <= lineEndOffset && start < end)
+                {
+                    ChangeLinePart(start, end, element =>
+                    {
+                        element.TextRunProperties.SetForegroundBrush(keywordBrush);
+                    });
+                }
+            }
+        }
+        catch
+        {
+            // Colorizing must never throw or crash the editor
         }
     }
 }

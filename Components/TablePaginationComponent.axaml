@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:vm="using:Fdb.ViewModels"
+              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="25"
+              x:Class="Fdb.Components.TablePaginationComponent"
+              x:DataType="vm:QueryResultTableViewModel">
+
+    <!-- Reusable Table Pagination & Selection Status Bar Component -->
+    <Border Background="{DynamicResource AppSurfaceBrush}" 
+            BorderBrush="{DynamicResource AppBorderBrush}" 
+            BorderThickness="0,1,0,0" 
+            Height="22" 
+            Padding="8,0">
+        <Grid ColumnDefinitions="Auto, *, Auto">
+            <TextBlock Grid.Column="0" 
+                       Text="{Binding SelectionStatus}" 
+                       Foreground="{DynamicResource AppTextMutedBrush}" 
+                       FontSize="11" 
+                       VerticalAlignment="Center"/>
+
+            <!-- Pagination Navigation -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                <Button Classes="classic-menu-btn" Content="«" Padding="6,1" FontSize="11" MinHeight="18" />
+                <Button Classes="classic-menu-btn" Content="‹" Padding="6,1" FontSize="11" MinHeight="18" />
+                <TextBlock Text="Page 1 of 1" Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" Margin="4,0"/>
+                <Button Classes="classic-menu-btn" Content="›" Padding="6,1" FontSize="11" MinHeight="18" />
+                <Button Classes="classic-menu-btn" Content="»" Padding="6,1" FontSize="11" MinHeight="18" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

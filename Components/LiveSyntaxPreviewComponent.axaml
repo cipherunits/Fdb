@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:vm="using:Fdb.ViewModels"
+              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="80"
+              x:Class="Fdb.Components.LiveSyntaxPreviewComponent"
+              x:DataType="vm:SettingsModalViewModel">
+
+    <!-- Reusable Live Syntax Preview Card Component -->
+    <Border Background="{DynamicResource AppBackgroundBrush}" 
+            BorderBrush="{DynamicResource AppBorderBrush}" 
+            BorderThickness="1" 
+            CornerRadius="6" 
+            Padding="14,10" 
+            Margin="0,4,0,0">
+        <StackPanel Spacing="6">
+            <Grid ColumnDefinitions="Auto, *">
+                <TextBlock Grid.Column="0" Text="LIVE SYNTAX PREVIEW" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AppTextMutedBrush}"/>
+                <TextBlock Grid.Column="1" Text="High contrast preserved across themes" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" HorizontalAlignment="Right"/>
+            </Grid>
+            <Border Background="{DynamicResource AppSurfaceBrush}" 
+                    BorderBrush="{DynamicResource AppBorderLightBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="4" 
+                    Padding="10,8">
+                <SelectableTextBlock FontFamily="{DynamicResource AppFontFamilyMonospace}" FontSize="12">
+                    <Run Text="SELECT " Foreground="{DynamicResource AppKeywordBrush}" FontWeight="SemiBold" />
+                    <Run Text="u.id, u.name, u.email " Foreground="{DynamicResource AppTextPrimaryBrush}" />
+                    <Run Text="FROM " Foreground="{DynamicResource AppKeywordBrush}" FontWeight="SemiBold" />
+                    <Run Text="users u " Foreground="{DynamicResource AppTextPrimaryBrush}" />
+                    <Run Text="WHERE " Foreground="{DynamicResource AppKeywordBrush}" FontWeight="SemiBold" />
+                    <Run Text="u.active = 1;" Foreground="{DynamicResource AppTextPrimaryBrush}" />
+                </SelectableTextBlock>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

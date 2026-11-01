@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Fdb Studio
+GenericName=Database Management Tool
+Comment=Modern Cross-Platform Database Client and SQL IDE
+Exec=/usr/bin/fdb-studio %U
+Icon=fdb-studio
+Terminal=false
+Categories=Development;Database;IDE;
+StartupWMClass=Fdb
+Keywords=sql;database;sqlite;mssql;postgres;mysql;client;
