@@ -12,67 +12,67 @@
     <UserControl.Styles>
         <!-- Distinct Row Header / Index Column Cell Style with Prominent Divider Line -->
         <Style Selector="DataGridCell.row-header-col">
-            <Setter Property="Background" Value="#F1F5F9"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableGutterBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableGutterForegroundBrush}"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTableGutterBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,2,1"/>
         </Style>
 
         <!-- Alternating Column Cell Colors (Compact Height) -->
         <Style Selector="DataGridCell.white-col">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableWhiteColBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableCellForegroundBrush}"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Padding" Value="8,2"/>
-            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTableCellBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
         </Style>
         <Style Selector="DataGridCell.alt-col">
-            <Setter Property="Background" Value="#F8FAFC"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableAltColBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableCellForegroundBrush}"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Padding" Value="8,2"/>
-            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTableCellBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
         </Style>
 
         <!-- Hover State on Rows -->
         <Style Selector="DataGridRow:pointerover DataGridCell.row-header-col">
-            <Setter Property="Background" Value="#E2E8F0"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableHoverBackgroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:pointerover DataGridCell.white-col">
-            <Setter Property="Background" Value="#F1F5F9"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableHoverBackgroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:pointerover DataGridCell.alt-col">
-            <Setter Property="Background" Value="#E2E8F0"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableHoverBackgroundBrush}"/>
         </Style>
 
         <!-- Selected Row Highlight -->
         <Style Selector="DataGridRow:selected DataGridCell.row-header-col">
-            <Setter Property="Background" Value="#DBEAFE"/>
-            <Setter Property="Foreground" Value="#1D4ED8"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableSelectedBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableSelectedForegroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:selected DataGridCell.white-col">
-            <Setter Property="Background" Value="#EFF6FF"/>
-            <Setter Property="Foreground" Value="#1D4ED8"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableActiveBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableActiveForegroundBrush}"/>
         </Style>
         <Style Selector="DataGridRow:selected DataGridCell.alt-col">
-            <Setter Property="Background" Value="#EFF6FF"/>
-            <Setter Property="Foreground" Value="#1D4ED8"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableActiveBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableActiveForegroundBrush}"/>
         </Style>
 
         <!-- Column Header Styling with Prominent Titles (Compact Height) -->
         <Style Selector="DataGridColumnHeader">
-            <Setter Property="Background" Value="#F1F5F9"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="Background" Value="{DynamicResource AppTableHeaderBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTableHeaderForegroundBrush}"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Height" Value="25"/>
             <Setter Property="Padding" Value="8,2"/>
-            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTableHeaderBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
         </Style>
     </UserControl.Styles>
@@ -121,8 +121,8 @@
                       AutoGenerateColumns="False" 
                       IsReadOnly="True" 
                       GridLinesVisibility="All" 
-                      HorizontalGridLinesBrush="#CBD5E1" 
-                      VerticalGridLinesBrush="#E2E8F0"
+                      HorizontalGridLinesBrush="{DynamicResource AppTableGridLinesHorizontalBrush}" 
+                      VerticalGridLinesBrush="{DynamicResource AppTableGridLinesVerticalBrush}"
                       CanUserResizeColumns="True" 
                       CanUserSortColumns="True"
                       HeadersVisibility="Column"
@@ -139,7 +139,7 @@
                                 <Grid ColumnDefinitions="*, Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                     <TextBlock Grid.Column="0" 
                                                Text="{Binding Ordinal}" 
-                                               Foreground="#0F172A" 
+                                               Foreground="{DynamicResource AppTableGutterForegroundBrush}" 
                                                FontSize="11" 
                                                FontWeight="Bold" 
                                                HorizontalAlignment="Center" 
@@ -147,7 +147,7 @@
                                     <!-- Clear vertical divider line right in front of the row number -->
                                     <Border Grid.Column="1" 
                                             Width="2" 
-                                            Background="#94A3B8" 
+                                            Background="{DynamicResource AppTableDividerBrush}" 
                                             HorizontalAlignment="Right" 
                                             VerticalAlignment="Stretch"/>
                                 </Grid>

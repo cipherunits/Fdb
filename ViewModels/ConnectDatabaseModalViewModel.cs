@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -66,9 +67,12 @@ public partial class ConnectDatabaseModalViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public void Connect()
+    public async Task Connect()
     {
-        // Ready to set active connection
+        // Persist connection record to SQLite database
+        await Fdb.Services.DatabaseStorageService.Instance.SaveConnectionAsync(
+            Server, Port, Database, AuthType, Username);
+
         IsOpen = false;
     }
 }

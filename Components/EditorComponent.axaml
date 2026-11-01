@@ -3,6 +3,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Fdb.ViewModels"
+             xmlns:components="using:Fdb.Components"
+             xmlns:services="using:Fdb.Services"
              xmlns:ae="using:AvaloniaEdit"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
@@ -142,23 +144,33 @@
                 </Grid>
             </Border>
 
-            <!-- 2. Text Editor Canvas with SQL Syntax Highlighting & Autocomplete -->
+            <!-- 2. Text Editor Canvas with SQL Syntax Highlighting & IntelliSense Overlay -->
             <Border Grid.Row="1" 
                     Background="{DynamicResource AppWorkspaceBrush}" 
                     BorderBrush="{DynamicResource AppBorderBrush}" 
                     BorderThickness="1" 
                     CornerRadius="4"
-                    Margin="6">
-                <ae:TextEditor Name="CodeEditor"
-                               ShowLineNumbers="True"
-                               FontFamily="Cascadia Code, Consolas, Courier New, monospace"
-                               FontSize="13"
-                               Foreground="{DynamicResource AppEditorForegroundBrush}"
-                               Background="{DynamicResource AppEditorBackgroundBrush}"
-                               HorizontalScrollBarVisibility="Auto"
-                               VerticalScrollBarVisibility="Auto"
-                               WordWrap="False"
-                               Margin="4"/>
+                    Margin="6"
+                    ClipToBounds="True">
+                <Grid>
+                    <ae:TextEditor Name="CodeEditor"
+                                   ShowLineNumbers="True"
+                                   FontFamily="Cascadia Code, Consolas, Courier New, monospace"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource AppEditorForegroundBrush}"
+                                   Background="{DynamicResource AppEditorBackgroundBrush}"
+                                   HorizontalScrollBarVisibility="Auto"
+                                   VerticalScrollBarVisibility="Auto"
+                                   WordWrap="False"
+                                   Margin="4"/>
+
+                    <!-- In-Place Autocomplete Floating Card Overlay (Modular Reusable Component) -->
+                    <Canvas Name="CompletionOverlayCanvas" ClipToBounds="True">
+                        <components:SqlIntelliSenseOverlayComponent x:Name="IntelliSenseOverlay"
+                                                                    IsVisible="False"
+                                                                    ItemCommitted="OnIntelliSenseItemCommitted" />
+                    </Canvas>
+                </Grid>
             </Border>
         </Grid>
     </Border>

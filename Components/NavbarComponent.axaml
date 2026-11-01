@@ -45,10 +45,19 @@
                                 <MenuItem Header="Export Results to File..." 
                                           Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).ExportModal.OpenCommand}" />
                                 <Separator />
-                                <MenuItem Header="New Query" InputGesture="Ctrl+N" />
-                                <MenuItem Header="Save" InputGesture="Ctrl+S" />
+                                <MenuItem Header="New Query" 
+                                          InputGesture="Ctrl+N" 
+                                          Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Editor.AddTabCommand}" />
+                                <MenuItem Header="Save" 
+                                          InputGesture="Ctrl+S" 
+                                          Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).SaveQueryCommand}" />
                                 <Separator />
-                                <MenuItem Header="Exit" />
+                                <MenuItem Header="Settings..." 
+                                          InputGesture="Ctrl+," 
+                                          Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).SettingsModal.OpenCommand}" />
+                                <Separator />
+                                <MenuItem Header="Exit" 
+                                          Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).ExitCommand}" />
                             </MenuItem>
 
                             <!-- Edit Menu -->
@@ -139,21 +148,27 @@
                             FontWeight="SemiBold" 
                             FontSize="11" 
                             CornerRadius="4" 
-                            Padding="10,4">
+                            Padding="10,4"
+                            Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).ExecuteQueryCommand}"
+                            ToolTip.Tip="Execute active SQL query (F5)">
                         <StackPanel Orientation="Horizontal" Spacing="5">
                             <ui:FASymbolIcon Symbol="Play" FontSize="11" VerticalAlignment="Center"/>
                             <TextBlock Text="Run (F5)" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
-                    <Button Classes="classic-tool-btn">
+                    <Button Classes="classic-tool-btn"
+                            Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Editor.AddTabCommand}"
+                            ToolTip.Tip="Open New Query Tab (Ctrl+N)">
                         <StackPanel Orientation="Horizontal" Spacing="5">
                             <ui:FASymbolIcon Symbol="Add" FontSize="11" VerticalAlignment="Center"/>
                             <TextBlock Text="New Query" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
-                    <Button Classes="classic-tool-btn">
+                    <Button Classes="classic-tool-btn"
+                            Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).SaveQueryCommand}"
+                            ToolTip.Tip="Save Query to SQLite Storage (Ctrl+S)">
                         <StackPanel Orientation="Horizontal" Spacing="5">
                             <ui:FASymbolIcon Symbol="Save" FontSize="11" VerticalAlignment="Center"/>
                             <TextBlock Text="Save" VerticalAlignment="Center"/>

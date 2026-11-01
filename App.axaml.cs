@@ -24,6 +24,11 @@ public partial class App : Application
         {
             if (DisableSplash || desktop.Args?.Contains("--no-splash") == true)
             {
+                var theme = Services.DatabaseStorageService.Instance.GetThemeAsync().GetAwaiter().GetResult();
+                Services.ThemeService.Instance.ApplyTheme(theme);
+                var keywordColor = Services.DatabaseStorageService.Instance.GetKeywordColorAsync().GetAwaiter().GetResult();
+                Services.ThemeService.Instance.SetKeywordColor(keywordColor);
+
                 desktop.MainWindow = new MainWindow
                 {
                     DataContext = new MainViewModel(),
@@ -37,8 +42,8 @@ public partial class App : Application
 
                 _ = Task.Run(async () =>
                 {
-                    // Simulated 3-second startup sequence
-                    await splash.RunStartupSequenceAsync(3000);
+                    // Execute startup SQL queries and initialize SQLite engine
+                    await splash.RunStartupSequenceAsync();
 
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {

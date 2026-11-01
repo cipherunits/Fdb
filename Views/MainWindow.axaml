@@ -50,7 +50,7 @@
                 </Grid.RowDefinitions>
                 
                 <!-- CENTER DOCUMENT CANVAS -->
-                <components:EditorComponent Grid.Row="0" DataContext="{Binding Editor}" />
+                <components:EditorComponent x:Name="MainEditor" Grid.Row="0" DataContext="{Binding Editor}" />
 
                 <!-- HORIZONTAL DRAG SPLITTER FOR FOOTER -->
                 <GridSplitter x:Name="FooterSplitter"
@@ -74,5 +74,6 @@
         <components:ConnectDatabaseModalComponent Grid.Row="0" Grid.RowSpan="3" ZIndex="100" DataContext="{Binding ConnectModal}" />
         <components:ConfirmActionModalComponent Grid.Row="0" Grid.RowSpan="3" ZIndex="101" DataContext="{Binding ConfirmModal}" />
         <components:ExportDataModalComponent Grid.Row="0" Grid.RowSpan="3" ZIndex="102" DataContext="{Binding ExportModal}" />
+        <components:SettingsModalComponent Grid.Row="0" Grid.RowSpan="3" ZIndex="103" DataContext="{Binding SettingsModal}" />
     </Grid>
 </Window>

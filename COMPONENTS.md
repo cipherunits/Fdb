@@ -1,273 +1,486 @@
-# Fdb Studio — UI Components & Architecture Documentation
+# Fdb Studio — Reusable UI Components & Integration Guide
 
-## 1. Overview
+## 1. Overview & Architecture
 
-**Fdb Studio** is a modern, high-performance database management desktop application (similar to DBeaver, SSMS, and VS Code) built with **.NET 10**, **Avalonia UI 12.1.1**, **FluentAvalonia 3.1.0**, and **AvaloniaEdit 12.0.0**.
+**Fdb Studio** is an enterprise-grade database management desktop IDE built with **.NET 10**, **Avalonia UI 12.1.1**, **FluentAvalonia 3.1.0**, **AvaloniaEdit 12.0.0**, and **Dapper 2.1.89**.
 
-The user interface follows a strictly componentized, reusable MVVM architecture with dynamic responsive layouts, bounded splitters, auto-expanding uniform tabs, and a modern clean light aesthetic.
+The application is structured around a **strictly modular, reusable component architecture**. Visual elements are isolated into self-contained `UserControl` components residing in the `Fdb.Components` namespace, accompanied by dedicated MVVM ViewModels, SQLite persistent services, and Microsoft Fluent vector iconography.
 
-### Iconography System
-All icons across the application strictly use **Microsoft Fluent vector icons** (`FluentAvalonia.UI.Controls.FASymbolIcon`) and vector `PathIcon` geometries. All emojis, stickers, and informal glyphs have been completely eliminated from the codebase in favor of sharp, scalable vector typography.
+### Core Principles
+1. **Zero Emojis / Native Vector Icons:** All graphical glyphs strictly utilize Microsoft Fluent vector symbols (`FluentAvalonia.UI.Controls.FASymbolIcon`) and `PathIcon` vector geometries.
+2. **Encapsulation & Reusability:** Every component owns its visual hierarchy, templates, and event routing, and exposes clean public APIs, styled properties, and routed events.
+3. **Decoupled MVVM:** ViewModels never directly reference Avalonia UI controls. Data contexts and commands drive state changes.
+4. **Resilient Autocomplete:** Avoids fragile third-party popup hosts; IntelliSense suggestions are delivered via dedicated in-tree overlay components.
+5. **High-Performance Micro-ORM (Dapper):** All internal SQLite database interactions, object mappings, and query executions are powered by Dapper for maximum efficiency and clean parameterization.
 
 ---
 
 ## 2. Component Catalog Directory
 
-All visual elements are organized into modular, reusable `UserControl` components in the `Fdb.Components` namespace (`Components/` folder):
-
 ```
 Components/
-├── Layout & Workspace Components:
-│   ├── NavbarComponent.axaml               # Top navigation bar & native menu system
-│   ├── SidebarComponent.axaml              # Dynamic collapsible side tool window
-│   ├── EditorComponent.axaml               # Center document text editor workspace
-│   ├── FooterComponent.axaml               # Dynamic collapsible bottom output panel
-│   ├── StatusBarComponent.axaml            # Persistent bottom desktop status bar
-│   └── ToolWindowHeaderComponent.axaml     # Reusable header for tool windows
+├── Editor & IntelliSense:
+│   ├── EditorComponent.axaml                   # Multi-tab SQL query editor workspace
+│   └── SqlIntelliSenseOverlayComponent.axaml   # Reusable floating SQL autocomplete & snippet card
 │
-├── Data Table Components:
-│   ├── QueryResultTableComponent.axaml     # Professional SQL query results data grid
-│   └── SchemaPropertiesTableComponent.axaml # Database table schema & column metadata grid
+├── Data Tables & Grids:
+│   ├── QueryResultTableComponent.axaml         # Excel-grade query results grid with alternating columns
+│   └── SchemaPropertiesTableComponent.axaml     # Database schema, table columns, and metadata viewer
 │
-└── Modal & Dialog Components:
-    ├── ModalOverlayComponent.axaml         # Universal base modal backdrop & dialog card
-    ├── ConnectDatabaseModalComponent.axaml  # SQL Server connection configuration modal
-    ├── ConfirmActionModalComponent.axaml   # Action confirmation & danger alert dialog
-    └── ExportDataModalComponent.axaml      # Data export format & destination picker modal
+├── Modals & Dialogs:
+│   ├── ModalOverlayComponent.axaml             # Universal base modal backdrop & dialog card
+│   ├── ConnectDatabaseModalComponent.axaml      # SQL Server connection configuration dialog
+│   ├── ConfirmActionModalComponent.axaml       # Action confirmation & danger alert dialog
+│   ├── ExportDataModalComponent.axaml          # Data export format (CSV/JSON/SQL/TSV) modal
+│   └── SettingsModalComponent.axaml            # Application preferences, theme, and syntax color modal
+│
+├── Themes & Design System Components:
+│   ├── Themes/ThemeTokens.axaml                # Componentized shared design metrics & typography
+│   ├── Themes/LightTheme.axaml                 # Light theme semantic color tokens & table brushes
+│   └── Themes/DarkTheme.axaml                  # Dark theme semantic color tokens & table brushes
+│
+└── Layout & Tool Windows:
+    ├── NavbarComponent.axaml                   # Top navigation bar, menu system, and run toolbar
+    ├── SidebarComponent.axaml                  # Collapsible left panel (Object Explorer)
+    ├── FooterComponent.axaml                   # Collapsible & Fullscreen bottom results panel
+    ├── StatusBarComponent.axaml                # Bottom status bar with connection badges
+    └── ToolWindowHeaderComponent.axaml         # Reusable header with title, close, and maximize actions
 ```
 
 ---
 
-## 3. Data Table Components
+## 3. How to Use Each Component (Usage Guides & Examples)
 
-### 3.1 `QueryResultTableComponent`
-* **File:** [QueryResultTableComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/QueryResultTableComponent.axaml) | [QueryResultTableComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/QueryResultTableComponent.axaml.cs)
-* **DataContext:** `QueryResultTableViewModel`
-* **Role:** High-performance, full-featured interactive database query results grid.
-* **Features:**
-  1. **Alternating Column Colors, Compact Row Height & Explicit Row Numbers:**
-     * **Compact Height (25px):** Rows are configured with `RowHeight="25"` (header height 25px, cell padding 8,2) for dense, professional SQL IDE table view without wasted vertical space.
-     * Columns alternate between pure white (`#FFFFFF`) and a soft dimmer off-white (`#F8FAFC`) to clearly separate and distinguish vertical data columns.
-     * **Row Number Column (`ROW #`):** Column 0 features a dedicated gutter cell (`#F1F5F9`) titled `ROW #` with high-contrast centered bold row numbers (`1`, `2`, `3`, etc.) and a distinct vertical divider line (`2px solid #94A3B8`) in front of every row number, clearly separating the row indices from data.
-     * Clean 1px `#CBD5E1` / `#E2E8F0` cell border gridlines.
-     * Soft blue highlight (`#EFF6FF`, `#1D4ED8`) on row selection.
-  2. **Prominent Column Titles:**
-     * Bold column headers (`ROW #`, `NAME`, `ID`, `EMAIL`, `ROLE`, `STATUS`, `CREATED AT`) with `#0F172A` high-contrast typography and subtle 1px border separators.
-     * Under the `NAME` header, row names ("Alice Johnson", "Bob Smith", etc.) are displayed clearly.
-     * The `STATUS` column displays clean, unboxed text directly.
-  3. **Table Header Toolbar:**
-     * Search filter box for instant row filtering.
-     * Execution duration badge with vector clock icon.
-     * Row count badge (e.g. `5 rows`).
-     * Action buttons with Microsoft Fluent vector icons: `Refresh` and `Export...`.
-  4. **Right-Click ContextMenu:**
-     * `Copy Cell Value` (`Ctrl+C`)
-     * `Copy Entire Row`
-     * `Copy as JSON`
-     * `Copy as CSV`
-     * `Filter by This Value`
-  5. **Table Footer / Pagination:**
-     * Status indicator (`Ready • Double-click cell to inspect details`).
-     * Pagination navigation controls (`«`, `‹`, `Page 1 of 1`, `›`, `»`).
+This section provides comprehensive documentation and copy-pasteable code examples for using every component in XAML and C#.
+
+```xml
+<!-- Add the XML namespace to your XAML root: -->
+xmlns:components="using:Fdb.Components"
+```
 
 ---
 
-### 3.2 `SchemaPropertiesTableComponent`
-* **File:** [SchemaPropertiesTableComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/SchemaPropertiesTableComponent.axaml) | [SchemaPropertiesTableComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/SchemaPropertiesTableComponent.axaml.cs)
-* **DataContext:** `SchemaPropertiesTableViewModel`
-* **Role:** Interactive schema and table definition viewer with alternating column striping and row dividers.
-* **Features:**
-  1. **Compact Row Height (25px) & Explicit Row Numbers (`ROW #`):**
-     * Col 0 (`ROW #`) displays the ordinal row number (`1`, `2`, `3`, etc.) with high-contrast centered bold font and a 2px vertical dividing line in front of it.
-     * Configured with `RowHeight="25"` for a compact, clean look.
-     * Columns alternate between `#FFFFFF` and `#F8FAFC`.
-  2. **Schema Header Toolbar:**
-     * Filter columns search input.
-     * `Copy Column Names` button with vector copy icon.
-     * `Generate DDL` button with vector code icon.
-  3. **Columns Metadata Grid:**
-     * Key indicators: Primary Key (vector checkmark) and Foreign Key (vector link) badges.
-     * Titles: `ROW #`, `KEY`, `COLUMN NAME`, `DATA TYPE`, `LENGTH`, `NULLABLE`, `DEFAULT`, `DESCRIPTION`.
+### 3.1 `SqlIntelliSenseOverlayComponent`
+* **File:** [SqlIntelliSenseOverlayComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/SqlIntelliSenseOverlayComponent.axaml) | [SqlIntelliSenseOverlayComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/SqlIntelliSenseOverlayComponent.axaml.cs)
+* **Description:** A floating IntelliSense suggestion card featuring SQL keyword prioritization (e.g., `SELECT` ranking #1 on typing 'S'), code snippet templates, vector icons, keyboard navigation, and live documentation previews.
+
+#### Public API:
+* **Events:**
+  * `event EventHandler<SqlCompletionData>? ItemCommitted`: Fired when the user selects and commits an item (via `Enter`, `Tab`, or mouse click).
+  * `event EventHandler? Dismissed`: Fired when the overlay closes.
+* **Properties:**
+  * `int ItemCount`: Total number of matching suggestions.
+  * `SqlCompletionData? SelectedItem`: Currently highlighted suggestion item.
+  * `string ActiveFilterWord`: The prefix string used to filter the list.
+* **Methods:**
+  * `bool UpdateFilter(string currentWord, bool showAll = false)`: Filters suggestions based on `currentWord`. Returns `true` if matches were found.
+  * `void PositionAt(Point canvasPoint, double lineHeight, Size canvasSize)`: Positions the card relative to a caret coordinate, automatically flipping above the caret when near the bottom of the canvas.
+  * `void SelectNext()`: Highlights the next item down the list.
+  * `void SelectPrevious()`: Highlights the previous item up the list.
+  * `void CommitSelected()`: Commits the active selection and fires `ItemCommitted`.
+  * `void Hide()`: Dismisses the card and clears the current match set.
+
+#### XAML Usage Example:
+```xml
+<Grid>
+    <!-- Code Editor Canvas -->
+    <ae:TextEditor Name="MyTextEditor" />
+
+    <!-- Overlay Canvas hosting the Reusable IntelliSense Component -->
+    <Canvas Name="OverlayCanvas" ClipToBounds="True">
+        <components:SqlIntelliSenseOverlayComponent x:Name="IntelliSenseOverlay"
+                                                    IsVisible="False"
+                                                    ItemCommitted="OnIntelliSenseItemCommitted" />
+    </Canvas>
+</Grid>
+```
+
+#### C# Integration Example:
+```csharp
+// 1. Show suggestions when typing
+private void OnTextEntered(object? sender, TextInputEventArgs e)
+{
+    string word = GetCurrentWord();
+    if (word.Length >= 1)
+    {
+        if (IntelliSenseOverlay.UpdateFilter(word))
+        {
+            Point caretPos = GetCaretPoint();
+            IntelliSenseOverlay.PositionAt(caretPos, 18.0, OverlayCanvas.Bounds.Size);
+        }
+    }
+    else
+    {
+        IntelliSenseOverlay.Hide();
+    }
+}
+
+// 2. Intercept keyboard navigation
+private void OnKeyDown(object? sender, KeyEventArgs e)
+{
+    if (IntelliSenseOverlay.IsVisible)
+    {
+        if (e.Key == Key.Down) { IntelliSenseOverlay.SelectNext(); e.Handled = true; }
+        else if (e.Key == Key.Up) { IntelliSenseOverlay.SelectPrevious(); e.Handled = true; }
+        else if (e.Key is Key.Tab or Key.Enter) { IntelliSenseOverlay.CommitSelected(); e.Handled = true; }
+        else if (e.Key == Key.Escape) { IntelliSenseOverlay.Hide(); e.Handled = true; }
+    }
+}
+
+// 3. Handle item insertion
+private void OnIntelliSenseItemCommitted(object? sender, SqlCompletionData item)
+{
+    ReplaceCurrentWordWith(item.InsertionText);
+    MyTextEditor.TextArea.Focus();
+}
+```
 
 ---
 
-## 4. Modal & Dialog Components
-
-All modals in Fdb Studio feature:
-* **Interactive Dismissal:** Clicking the dark semi-transparent backdrop dismisses the dialog immediately.
-* **Keyboard Navigation:** Pressing `Escape` anywhere in the application dismisses any open modal dialog cleanly.
-* **Z-Index Elevation:** Configured with top-level `ZIndex="100+"` in `MainWindow.axaml` ensuring modals always appear elevated above editor canvases, splitters, and data grids.
-
-### 4.1 `ModalOverlayComponent` (Base Modal Container)
-* **File:** [ModalOverlayComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/ModalOverlayComponent.axaml) | [ModalOverlayComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/ModalOverlayComponent.axaml.cs)
-* **Role:** Universal reusable modal overlay with semi-transparent backdrop and elevated card. Supports hosting arbitrary XAML children via `[Content] public object? ModalContent`.
-* **StyledProperties:**
-  * `IsOpen` (`bool`): Controls modal visibility and backdrop.
-  * `Title` (`string`): Modal card header title.
-  * `Subtitle` (`string?`): Optional explanatory text below title.
-  * `Icon` (`string`): Emoji or glyph icon in the header badge.
-  * `CloseCommand` (`ICommand?`): Invoked on backdrop click, `✕` close button, or cancel.
-  * `DialogWidth` (`double`, default: `520`): Width of the dialog card.
-  * `PrimaryButtonText` (`string?`): Label for primary action button (e.g. `"Save"`, `"OK"`).
-  * `PrimaryCommand` (`ICommand?`): Bound to primary action.
-  * `SecondaryButtonText` / `SecondaryCommand`: Optional left action button.
-  * `CancelButtonText` (`string`, default: `"Cancel"`).
-  * `ModalContent` (`object?`): Content slot for custom body content.
-
----
-
-### 4.2 `ConnectDatabaseModalComponent`
-* **File:** [ConnectDatabaseModalComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/ConnectDatabaseModalComponent.axaml) | [ConnectDatabaseModalComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/ConnectDatabaseModalComponent.axaml.cs)
-* **DataContext:** `ConnectDatabaseModalViewModel`
-* **Role:** Dedicated SQL Server connection dialog.
-* **Triggers:**
-  * Top Navbar `File` $\rightarrow$ `Connect to Database...` (`Ctrl+Shift+C`).
-  * Top Navbar toolbar `Connect...` button.
-  * Object Explorer (Sidebar) empty state `Connect to Database...` button.
-* **Fields:**
-  * Server Host / IP (default: `localhost`) & Port (default: `1433`).
-  * Initial Database (default: `master`).
-  * Authentication method dropdown (`SQL Server Authentication`, `Windows Authentication`, `Microsoft Entra`).
-  * Username & masked Password.
-  * `Trust Server Certificate` encryption checkbox.
-  * Live status alert badge (displays test connection success or error details).
-  * Action buttons: `Test Connection`, `Cancel`, `Connect`.
-
----
-
-### 4.3 `ConfirmActionModalComponent`
-* **File:** [ConfirmActionModalComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/ConfirmActionModalComponent.axaml) | [ConfirmActionModalComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/ConfirmActionModalComponent.axaml.cs)
-* **DataContext:** `ConfirmActionModalViewModel`
-* **Role:** Danger and confirmation dialog for destructive or session-terminating actions (e.g. `Disconnect`, `DROP TABLE`, `TRUNCATE`).
-* **Triggers:**
-  * Top Navbar toolbar `Disconnect` button.
-* **Features:**
-  * Amber/Red danger icon badge with Fluent vector alert symbol.
-  * Detailed warning explanation.
-  * Highlighted target item badge (e.g. `localhost:1433 (master)`).
-  * Red danger confirm button (`#DC2626`).
-
----
-
-### 4.4 `ExportDataModalComponent`
-* **File:** [ExportDataModalComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/ExportDataModalComponent.axaml) | [ExportDataModalComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/ExportDataModalComponent.axaml.cs)
-* **DataContext:** `ExportDataModalViewModel`
-* **Role:** Data export configuration dialog.
-* **Triggers:**
-  * Query Results Table toolbar `Export...` button.
-  * Query Results Table right-click context menu `Export Results to File...`.
-  * Top Navbar `File` $\rightarrow$ `Export Results to File...`.
-* **Features:**
-  * Format selector dropdown: `CSV`, `JSON`, `SQL (INSERT INTO)`, `TSV`.
-  * Destination file path selector with native OS `Browse...` file picker integration (`SaveFilePickerAsync`).
-  * `Include column headers in export` option checkbox.
-  * `Cancel` and `Export Data` action buttons.
-
----
-
-## 5. Layout & Workspace Components
-
-### 5.1 `NavbarComponent`
-* **File:** [NavbarComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/NavbarComponent.axaml) | [NavbarComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/NavbarComponent.axaml.cs)
-* **Role:** Fixed top navigation bar.
-* **Features:**
-  * Native MenuBar (`File`, `Edit`, `View`, `Window`, `Help`).
-  * `File` $\rightarrow$ `Connect to Database...` (`Ctrl+Shift+C`) opens `ConnectDatabaseModal`.
-  * `Window` menu provides one-click restoration of any closed tab or panel.
-  * Run / Query toolbar with quick `⚡ Connect...` trigger.
-
-### 5.2 `SidebarComponent`
-* **File:** [SidebarComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/SidebarComponent.axaml) | [SidebarComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/SidebarComponent.axaml.cs)
-* **Role:** Left resizable panel (bounded: `160px – 450px`).
-* **Features:** Auto-expanding tabs via `<UniformGrid Rows="1" />`, right-click context menu, and tree container.
-
-### 5.3 `EditorComponent`
+### 3.2 `EditorComponent`
 * **File:** [EditorComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/EditorComponent.axaml) | [EditorComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/EditorComponent.axaml.cs)
 * **DataContext:** `EditorViewModel`
-* **Role:** Central SQL query editor (`1*` star sizing).
-* **Features:**
-  1. **Independent Tab Content & Persistent Undo History:**
-     * Each tab maintains its own independent `TextDocument` with an isolated, persistent `UndoStack`.
-     * Switching tabs seamlessly preserves all edits and undo history per tab.
-  2. **Undo & Redo Handlers (Ctrl+Z & Ctrl+Y / Ctrl+Shift+Z):**
-     * Built-in explicit key handling ensures `Ctrl+Z` smoothly reverts edits back to earlier versions, and `Ctrl+Y` / `Ctrl+Shift+Z` redoes changes.
-  3. **Active Tab Blue Indicator:**
-     * Active tab displays a prominent 2.5px royal blue accent line (`#2563EB`) at the top.
-     * Tab title turns bold royal blue (`#2563EB`).
-     * Tab container transitions to pure white (`#FFFFFF`) canvas.
-     * Inactive tabs stay muted (`#64748B`, `#F8FAFC`).
-  4. **Auto-Expanding Tab Strip:** Built with `<UniformGrid Rows="1" />` ensuring tabs expand to 100% width and contract smoothly when tabs are closed.
-  5. **SQL Syntax Highlighting in Blue:** Powered by `SqlKeywordColorizer` reading keywords directly from `Assets/sql_keywords.json`.
-  6. **Focus-Safe Auto-Completion & IntelliSense:**
-     * Non-disruptive autocomplete: safely triggers on manual request (`Ctrl+Space`) or automatically after typing 3+ keyword letters without stealing editor focus or dropping the caret.
-     * `Escape` dismisses completion window and safely restores focus to `CodeEditor.TextArea`.
-     * Shows SQL keywords and code snippets with descriptions and one-click insertion.
+* **Description:** A multi-tab SQL document editor featuring isolated per-tab undo/redo history, auto-expanding uniform tabs, blue syntax highlighting (`#2563EB`), zooming shortcuts, and built-in IntelliSense autocomplete.
 
-### 5.4 `FooterComponent`
-* **File:** [FooterComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/FooterComponent.axaml) | [FooterComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/FooterComponent.axaml.cs)
-* **Role:** Bottom resizable results panel (bounded: `80px – 450px`).
-* **Features:** Auto-expanding tabs (`Terminal`, `Output`, `Problems`), right-click context menu, and embedded `QueryResultTableComponent`.
+#### Features & Shortcuts:
+* `Ctrl + +` / `Ctrl + =`: Zoom in (increases font size by 1px up to 40px).
+* `Ctrl + -`: Zoom out (decreases font size by 1px down to 8px).
+* `Ctrl + 0`: Reset zoom (restores font size to 13px).
+* `Ctrl + MouseWheel`: Smooth real-time font size zooming.
+* `Ctrl + Space`: Manually opens IntelliSense suggestions.
+* Auto-triggering autocomplete when typing any word character (`S` $\rightarrow$ suggests `SELECT`).
 
-### 5.5 `StatusBarComponent`
-* **File:** [StatusBarComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/StatusBarComponent.axaml) | [StatusBarComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/StatusBarComponent.axaml.cs)
-* **Role:** Persistent status bar anchored at the bottom of the window (`Row 2`).
+#### XAML Usage Example:
+```xml
+<components:EditorComponent x:Name="MainEditor" 
+                            DataContext="{Binding Editor}" />
+```
 
-### 5.6 `ToolWindowHeaderComponent`
+#### C# Usage Example:
+```csharp
+var editorVm = new EditorViewModel();
+editorVm.AddTab("Query 1.sql", "SELECT * FROM Users WHERE status = 'Active';");
+editorVm.AddTab("Query 2.sql", "SELECT id, email, created_at FROM Orders;");
+
+var editorComponent = new EditorComponent { DataContext = editorVm };
+
+// Access zoom methods programmatically:
+editorComponent.ZoomIn();
+editorComponent.ZoomOut();
+editorComponent.ResetZoom();
+```
+
+---
+
+### 3.3 `QueryResultTableComponent`
+* **File:** [QueryResultTableComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/QueryResultTableComponent.axaml) | [QueryResultTableComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/QueryResultTableComponent.axaml.cs)
+* **DataContext:** `QueryResultTableViewModel`
+* **Description:** An Excel-grade, high-performance database query results grid with compact 25px row heights, dynamic alternating column backgrounds, an explicit `ROW #` gutter column, quick search filter, execution metrics, and full data export capabilities. Fully adapted to both Light and Dark themes via semantic brush bindings without visual bugs or contrast issues.
+
+#### Features:
+* **Compact Row Height (`25px`):** Dense display maximizing vertical data visibility.
+* **Theme-Aware Alternating Columns:** Odd and even columns adapt seamlessly (`AppTableWhiteColBackgroundBrush` & `AppTableAltColBackgroundBrush`), maintaining optimal reading contrast in both Light and Dark themes.
+* **Theme-Aware Selection & Active Border:** Selected cells and active focused cells bind to dynamic theme resources (`AppTableSelectedBackgroundBrush`, `AppTableActiveBorderBrush`), completely eliminating hardcoded color artifacts.
+* **Row Number Column (`ROW #`):** High-contrast centered row numbering with a dedicated vertical boundary line (`AppTableDividerBrush`).
+* **Interactive Context Menu:** Copy Cell (`Ctrl+C`), Copy Entire Row, Copy as JSON, Copy as CSV.
+* **Fullscreen Mode:** Includes a dedicated Fullscreen/Maximize button that expands the table across the entire workspace.
+
+#### XAML Usage Example:
+```xml
+<components:QueryResultTableComponent x:Name="ResultsGrid" 
+                                      DataContext="{Binding SampleQueryResult}" />
+```
+
+#### C# Usage Example:
+```csharp
+var tableVm = new QueryResultTableViewModel();
+
+// Configure column definitions
+tableVm.Columns.Add(new QueryResultColumn { Header = "ID", DataType = "INT" });
+tableVm.Columns.Add(new QueryResultColumn { Header = "NAME", DataType = "NVARCHAR" });
+tableVm.Columns.Add(new QueryResultColumn { Header = "EMAIL", DataType = "NVARCHAR" });
+
+// Populate row data
+tableVm.Rows.Add(new QueryResultRow(1, ["101", "Alice Johnson", "alice@example.com"]));
+tableVm.Rows.Add(new QueryResultRow(2, ["102", "Bob Smith", "bob@example.com"]));
+
+// Bind to component
+var tableControl = new QueryResultTableComponent { DataContext = tableVm };
+```
+
+---
+
+### 3.4 `SchemaPropertiesTableComponent`
+* **File:** [SchemaPropertiesTableComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/SchemaPropertiesTableComponent.axaml) | [SchemaPropertiesTableComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/SchemaPropertiesTableComponent.axaml.cs)
+* **DataContext:** `SchemaPropertiesTableViewModel`
+* **Description:** Interactive table schema metadata viewer showing primary keys, foreign keys, data types, nullability, default values, and column descriptions with compact 25px alternating rows.
+
+#### XAML Usage Example:
+```xml
+<components:SchemaPropertiesTableComponent DataContext="{Binding SampleSchema}" />
+```
+
+#### C# Usage Example:
+```csharp
+var schemaVm = new SchemaPropertiesTableViewModel
+{
+    TableName = "dbo.Customers",
+    RowCount = 12450
+};
+
+schemaVm.Columns.Add(new SchemaColumnItem
+{
+    Ordinal = 1,
+    Name = "CustomerID",
+    DataType = "INT",
+    IsPrimaryKey = true,
+    IsNullable = false
+});
+
+var schemaControl = new SchemaPropertiesTableComponent { DataContext = schemaVm };
+```
+
+---
+
+### 3.5 `ModalOverlayComponent` (Universal Modal Base Card)
+* **File:** [ModalOverlayComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/ModalOverlayComponent.axaml) | [ModalOverlayComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/ModalOverlayComponent.axaml.cs)
+* **Description:** The foundational reusable modal card supporting arbitrary custom content via `ModalContent`, an interactive backdrop dismissal, keyboard `Escape` handling, and elevated `ZIndex`.
+
+#### Styled Properties:
+* `IsOpen` (`bool`): Controls modal visibility and backdrop.
+* `Title` (`string`): Header title text.
+* `Subtitle` (`string?`): Secondary guidance text below the title.
+* `DialogWidth` (`double`, default: `520`): Width of the modal card.
+* `CloseCommand` (`ICommand?`): Invoked on backdrop click or close button.
+* `PrimaryButtonText` (`string?`): Text for primary action button.
+* `PrimaryCommand` (`ICommand?`): Bound to primary action.
+* `SecondaryButtonText` / `SecondaryCommand`: Optional left action button.
+* `CancelButtonText` (`string`, default: `"Cancel"`).
+* `ModalContent` (`object?`): Content slot for custom body controls.
+
+#### XAML Usage Example:
+```xml
+<components:ModalOverlayComponent IsOpen="{Binding IsModalOpen}"
+                                  Title="Custom Configuration"
+                                  Subtitle="Configure your database sync options"
+                                  DialogWidth="480"
+                                  PrimaryButtonText="Apply Changes"
+                                  PrimaryCommand="{Binding SaveSettingsCommand}"
+                                  CloseCommand="{Binding CloseModalCommand}">
+    <components:ModalOverlayComponent.ModalContent>
+        <StackPanel Spacing="12" Margin="4">
+            <TextBlock Text="Sync Interval (Minutes):" FontWeight="SemiBold"/>
+            <NumericUpDown Value="15" Minimum="1" Maximum="1440"/>
+            <CheckBox Content="Enable Automatic Schema Reload" IsChecked="True"/>
+        </StackPanel>
+    </components:ModalOverlayComponent.ModalContent>
+</components:ModalOverlayComponent>
+```
+
+---
+
+### 3.6 `ConnectDatabaseModalComponent`
+* **File:** [ConnectDatabaseModalComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/ConnectDatabaseModalComponent.axaml) | [ConnectDatabaseModalComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/ConnectDatabaseModalComponent.axaml.cs)
+* **DataContext:** `ConnectDatabaseModalViewModel`
+* **Description:** Dedicated SQL Server connection dialog supporting host, port, database, authentication modes, encryption options, and live connection testing with status feedback.
+
+#### XAML Usage Example:
+```xml
+<components:ConnectDatabaseModalComponent DataContext="{Binding ConnectModal}" />
+```
+
+#### Triggering Connection:
+```csharp
+// Open modal
+mainVm.ConnectModal.IsOpen = true;
+
+// Programmatically test connection
+await mainVm.ConnectModal.TestConnectionCommand.ExecuteAsync(null);
+Console.WriteLine(mainVm.ConnectModal.StatusMessage);
+```
+
+---
+
+### 3.7 `ConfirmActionModalComponent`
+* **File:** [ConfirmActionModalComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/ConfirmActionModalComponent.axaml) | [ConfirmActionModalComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/ConfirmActionModalComponent.axaml.cs)
+* **DataContext:** `ConfirmActionModalViewModel`
+* **Description:** Danger alert dialog for destructive actions (`Disconnect`, `DROP`, `TRUNCATE`) featuring red warning accents, target resource tags, and confirmation commands.
+
+#### XAML Usage Example:
+```xml
+<components:ConfirmActionModalComponent DataContext="{Binding ConfirmModal}" />
+```
+
+#### Triggering Confirmation:
+```csharp
+mainVm.ConfirmModal.Open(
+    actionName: "Disconnect Session",
+    targetName: "localhost:1433 (master)",
+    warningMessage: "Are you sure you want to terminate the active connection? Any uncommitted transactions will be rolled back.",
+    confirmCommand: new RelayCommand(() => DisconnectActiveDatabase())
+);
+```
+
+---
+
+### 3.8 `ExportDataModalComponent`
+* **File:** [ExportDataModalComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/ExportDataModalComponent.axaml) | [ExportDataModalComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/ExportDataModalComponent.axaml.cs)
+* **DataContext:** `ExportDataModalViewModel`
+* **Description:** Data export configuration dialog supporting CSV, JSON, SQL INSERT, and TSV formats with native OS file dialog integration.
+
+#### XAML Usage Example:
+```xml
+<components:ExportDataModalComponent DataContext="{Binding ExportModal}" />
+```
+
+---
+
+### 3.9 `SettingsModalComponent` (Appearance, Theme & Syntax Colors)
+* **File:** [SettingsModalComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/SettingsModalComponent.axaml) | [SettingsModalComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/SettingsModalComponent.axaml.cs)
+* **DataContext:** `SettingsModalViewModel`
+* **Description:** Application preferences dialog featuring real-time color theme switching (`Light`, `Dark`, `System Default`) and SQL syntax keyword color customization, backed by SQLite persistent storage (`AppSettings` table via Dapper) and automatic loading during the startup splash screen.
+
+#### Features:
+1. **Interactive Workspace Theme Selection:**
+   * **Light Theme:** Clean, bright desktop workspace with high-contrast text.
+   * **Dark Theme:** Modern dark mode workspace with deep slate backgrounds (`#0F172A`, `#1E293B`) and blue accents.
+   * **System Default:** Synchronizes dynamically with the host operating system's dark/light preference.
+2. **SQL Syntax & Keyword Highlighting Color Customizer:**
+   * Allows users to customize the highlight color of SQL keywords (`SELECT`, `FROM`, `WHERE`) and IntelliSense suggestion badges.
+   * **6 Curated High-Contrast Presets:**
+     * **Royal Blue:** Light `#2563EB` | Dark `#60A5FA` (Default Studio Blue)
+     * **Emerald Green:** Light `#059669` | Dark `#34D399` (Mint & Emerald)
+     * **Violet Purple:** Light `#7C3AED` | Dark `#A78BFA` (Vibrant Lavender & Violet)
+     * **Amber Gold:** Light `#D97706` | Dark `#FBBF24` (Golden Amber & Honey)
+     * **Crimson Rose:** Light `#E11D48` | Dark `#FB7185` (Ruby Crimson & Rose)
+     * **Cyan Teal:** Light `#0891B2` | Dark `#38BDF8` (Oceanic Teal & Cyan)
+   * **Automatic Tone & Contrast Preservation:** Switching between Light and Dark themes dynamically re-tints the chosen keyword color to guarantee maximum legibility against the active background without contrast degradation.
+   * **Live Code Preview:** Shows a real-time mini code snippet in the settings dialog demonstrating the chosen keyword color.
+3. **Instant Live Preview:** Changes apply immediately across the text editor, IntelliSense overlay, and UI components without requiring a restart.
+4. **SQLite Database Persistence (Dapper):** Both `Theme` and `KeywordColor` are persisted to the `AppSettings` table via Dapper SQL commands.
+5. **Splash Screen Auto-Load:** The saved theme and syntax color are pre-loaded from SQLite during the splash screen startup sequence.
+6. **Access Shortcuts:**
+   * Top Navbar: `File` $\rightarrow$ `Settings...`
+   * Keyboard Shortcut: `Ctrl+,` (Ctrl + Comma)
+   * Dismissal: `Escape` key or backdrop click cancels any unsaved preview and restores the saved theme.
+
+#### XAML Usage Example:
+```xml
+<components:SettingsModalComponent Grid.Row="0" Grid.RowSpan="3" ZIndex="103" 
+                                  DataContext="{Binding SettingsModal}" />
+```
+
+#### C# Usage Example:
+```csharp
+// Open settings dialog programmatically
+await mainVm.SettingsModal.OpenAsync();
+
+// Switch to Dark theme and Emerald Green syntax color
+mainVm.SettingsModal.SelectTheme("Dark");
+mainVm.SettingsModal.SelectKeywordColor("Green");
+
+// Persist both settings to SQLite and close dialog
+await mainVm.SettingsModal.SaveAsync();
+```
+
+---
+
+### 3.10 Theme Components & Color Tokens
+* **Files:**
+  * [ThemeTokens.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Themes/ThemeTokens.axaml): Shared corner radii, table row heights (`25px`), and typography.
+  * [LightTheme.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Themes/LightTheme.axaml): Light mode semantic color tokens and table brushes.
+  * [DarkTheme.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Themes/DarkTheme.axaml): Dark mode semantic color tokens and table brushes.
+* **Description:** Modular AXAML resource dictionaries componentizing the application design system. Each theme is an independent component loaded into `Application.Resources.ThemeDictionaries`.
+
+#### Usage in App.axaml:
+```xml
+<Application.Resources>
+    <ResourceDictionary>
+        <ResourceDictionary.MergedDictionaries>
+            <ResourceInclude Source="avares://Fdb/Themes/ThemeTokens.axaml" />
+        </ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary.ThemeDictionaries>
+            <ResourceInclude x:Key="Light" Source="avares://Fdb/Themes/LightTheme.axaml" />
+            <ResourceInclude x:Key="Dark" Source="avares://Fdb/Themes/DarkTheme.axaml" />
+        </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+</Application.Resources>
+```
+
+---
+
+### 3.10 `ToolWindowHeaderComponent`
 * **File:** [ToolWindowHeaderComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/ToolWindowHeaderComponent.axaml) | [ToolWindowHeaderComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/ToolWindowHeaderComponent.axaml.cs)
-* **Role:** Reusable header bar with `Title` and `CloseCommand`.
+* **Description:** Reusable title header for dockable panels and tool windows with built-in Fullscreen/Maximize and Close buttons.
+
+#### Styled Properties:
+* `Title` (`string`): Panel title (e.g. `"OBJECT EXPLORER"`, `"QUERY RESULTS"`).
+* `IsMaximized` (`bool`): Toggles between Fullscreen (`FullScreen`) and Restore (`BackToWindow`) vector icons.
+* `IsMaximizeVisible` (`bool`, default: `true`): Controls visibility of the Maximize button.
+* `CloseCommand` (`ICommand?`): Invoked when clicking the close (`✕`) button.
+* `MaximizeCommand` (`ICommand?`): Invoked when clicking the maximize button.
+
+#### XAML Usage Example:
+```xml
+<components:ToolWindowHeaderComponent Title="QUERY RESULTS"
+                                      IsMaximized="{Binding Footer.IsMaximized}"
+                                      MaximizeCommand="{Binding ToggleFooterMaximizedCommand}"
+                                      CloseCommand="{Binding ToggleFooterCommand}" />
+```
 
 ---
 
-## 6. SQL Keywords, IntelliSense & Syntax Highlighting
+### 3.11 `NavbarComponent`
+* **File:** [NavbarComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/NavbarComponent.axaml) | [NavbarComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/NavbarComponent.axaml.cs)
+* **DataContext:** `NavbarViewModel`
+* **Description:** The top navigation bar containing native desktop menus (`File`, `Edit`, `View`, `Window`, `Help`) and action shortcuts.
 
-Fdb Studio features a data-driven SQL completion and syntax highlighting engine:
-
-* **Keywords Configuration:** [Assets/sql_keywords.json](file:///c:/Users/ehsan/Desktop/Fdb/Assets/sql_keywords.json)
-  * Over 110 SQL keywords (DDL, DML, Clauses, Joins, Aggregates, Types, System Functions).
-  * Common SQL snippets (`SELECT * FROM`, `CREATE TABLE`, `INSERT INTO VALUES`, `UPDATE SET WHERE`, etc.).
-* **Service:** [Services/SqlKeywordsService.cs](file:///c:/Users/ehsan/Desktop/Fdb/Services/SqlKeywordsService.cs)
-  * Fast JSON parser with fallback keywords and compiled regex builder.
-* **Colorizer:** [Services/SqlKeywordColorizer.cs](file:///c:/Users/ehsan/Desktop/Fdb/Services/SqlKeywordColorizer.cs)
-  * High-performance `DocumentColorizingTransformer` for `AvaloniaEdit` coloring all keywords from the JSON in royal blue (`#2563EB`).
-* **IntelliSense Autocomplete:** [Services/SqlCompletionData.cs](file:///c:/Users/ehsan/Desktop/Fdb/Services/SqlCompletionData.cs)
-  * Triggered automatically upon typing or via `Ctrl+Space`.
-  * Integrates with `AvaloniaEdit.CodeCompletion.CompletionWindow`.
+#### XAML Usage Example:
+```xml
+<components:NavbarComponent Grid.Row="0" 
+                            DataContext="{Binding Navbar}" />
+```
 
 ---
 
-## 8. Splash Screen & Application Startup
+### 3.12 `SidebarComponent`
+* **File:** [SidebarComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/SidebarComponent.axaml) | [SidebarComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/SidebarComponent.axaml.cs)
+* **DataContext:** `SidebarViewModel`
+* **Description:** The left-hand tool panel hosting the Database Object Explorer and schema tree views.
 
-Fdb Studio features a modern desktop startup splash screen:
-
-* **View:** [Views/SplashScreenWindow.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Views/SplashScreenWindow.axaml) | [Views/SplashScreenWindow.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Views/SplashScreenWindow.axaml.cs)
-* **ViewModel:** [ViewModels/SplashScreenViewModel.cs](file:///c:/Users/ehsan/Desktop/Fdb/ViewModels/SplashScreenViewModel.cs)
-* **Features:**
-  1. **Frameless Floating Card:** Borderless (`WindowDecorations="None"`), centered card with deep elevation shadow and gradient accent banner.
-  2. **Branding & Highlights:**
-     * Glowing vector flame icon badge.
-     * App title (`Fdb Studio`) and version badge (`v1.0.0 Developer Preview`).
-     * Tagline and feature pill badges.
-  3. **3-Second Simulated Progression:**
-     * Smooth 4-stage sequence transitioning over 3000ms:
-       1. `25%` - Initializing Core Runtime & Workspace...
-       2. `50%` - Loading SQL Keywords, IntelliSense & Syntax Highlighting...
-       3. `75%` - Scanning Database Drivers & Local Instances...
-       4. `100%` - Starting Studio Environment...
-  4. **Smooth Dismissal:**
-     * Automatically transitions to `MainWindow`.
-     * Users can click anywhere on the splash screen or press `Space`/`Enter`/`Escape` to dismiss immediately without waiting.
-  5. **CLI Bypass:**
-     * Launching with `--no-splash` immediately opens `MainWindow` without displaying the splash screen.
-
-* **Closing Footer:** Text editor expands downwards to occupy 100% vertical space.
-* **Closing Sidebar:** Both text editor and footer expand leftwards to occupy 100% horizontal space.
-* **Closing Tabs:** Remaining tabs inside `<UniformGrid Rows="1" />` automatically grow to fill the tab bar.
-* **Restoring via Window Menu:** Restores previous bounded dimensions (`160-450px` sidebar, `80-450px` footer).
-* **Splitter Dragging:** `DragCompleted` ensures center areas retain `1*` (Star) sizing.
+#### XAML Usage Example:
+```xml
+<components:SidebarComponent Grid.Column="0" 
+                             DataContext="{Binding Sidebar}" />
+```
 
 ---
 
-## 8. MVVM ViewModels Structure
+### 3.13 `FooterComponent`
+* **File:** [FooterComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/FooterComponent.axaml) | [FooterComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/FooterComponent.axaml.cs)
+* **DataContext:** `FooterViewModel`
+* **Description:** The collapsible and maximizable bottom dock housing query output tables, execution statistics, and logs.
+
+#### XAML Usage Example:
+```xml
+<components:FooterComponent Grid.Row="2" 
+                            DataContext="{Binding Footer}" />
+```
+
+---
+
+### 3.14 `StatusBarComponent`
+* **File:** [StatusBarComponent.axaml](file:///c:/Users/ehsan/Desktop/Fdb/Components/StatusBarComponent.axaml) | [StatusBarComponent.axaml.cs](file:///c:/Users/ehsan/Desktop/Fdb/Components/StatusBarComponent.axaml.cs)
+* **Description:** Anchored application footer bar displaying active database connection, server version, execution time, and keyboard layout indicators.
+
+#### XAML Usage Example:
+```xml
+<components:StatusBarComponent Grid.Row="2" />
+```
+
+---
+
+## 4. MVVM Hierarchy & Data Flow
 
 ```
 MainViewModel
@@ -276,14 +489,34 @@ MainViewModel
 ├── Editor: EditorViewModel
 │     ├── SelectedTab: EditorTabItem
 │     └── Tabs: ObservableCollection<EditorTabItem>
-├── Footer: FooterViewModel
+├── Footer: FooterViewModel (Manages IsMaximized & Fullscreen layout)
 │
 ├── Modals:
 │   ├── ConnectModal: ConnectDatabaseModalViewModel
 │   ├── ConfirmModal: ConfirmActionModalViewModel
-│   └── ExportModal: ExportDataModalViewModel
+│   ├── ExportModal: ExportDataModalViewModel
+│   └── SettingsModal: SettingsModalViewModel (Appearance & Theme preferences)
 │
 └── Tables:
     ├── SampleQueryResult: QueryResultTableViewModel
     └── SampleSchema: SchemaPropertiesTableViewModel
 ```
+
+---
+
+## 5. Verification & Test Suite
+
+Fdb Studio includes an automated layout, component, and autocomplete verification suite in `Program.cs`. To verify all components and behaviors:
+
+```powershell
+dotnet run -- --verify
+```
+
+### Verified Checks:
+1. **Dynamic Layout & Fullscreen Transitions:** Verifies sidebar collapse, footer collapse, and footer fullscreen maximize (`1*` Star takeover).
+2. **Table Component Rendering:** Validates compact row heights (`25px`), alternating column striping, and `ROW #` numbering.
+3. **Modal Dialog Lifecycles:** Tests trigger, backdrop dismissal, test connection execution, and confirm modals.
+4. **Editor Tab State & Undo Isolation:** Verifies per-tab persistent undo history across tab switches.
+5. **IntelliSense Autocomplete Overlay:** Validates that typing `S` displays `SELECT` at the top of the suggestion card, and pressing `Enter`/`Tab` cleanly commits the selection.
+6. **Zero Emojis Enforced:** Scans all AXAML visual templates ensuring 100% compliance with Microsoft Fluent vector icons (`FASymbolIcon` / `PathIcon`).
+7. **SQLite Engine & Dialects:** Queries SQLite database verifying multi-dialect keyword caches (`MSSQL`, `PostgreSQL`, `MySQL`, `SQLite`).
